@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.chaos.ethereal.helper.ArmyHelper;
 import org.chaos.ethereal.helper.BattleHelper;
+import org.chaos.ethereal.helper.UtilHelper;
 import org.chaos.ethereal.persistence.Army;
 import org.chaos.ethereal.persistence.Hero;
 import org.chaos.ethereal.persistence.Monster;
@@ -22,7 +24,6 @@ import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.github.javafaker.Faker;
 import com.google.gson.Gson;
 
@@ -34,7 +35,8 @@ public class BattleTest {
 	DynamoDBMapper mapper;
 	Faker faker;
 	Map<String, String> userCountry;
-	int armySize = 2000000;
+	int monstersSize = 2000000;
+	int heroesSize = 100;
 	
 	@Before
 	public void setUp() {
@@ -103,7 +105,8 @@ public class BattleTest {
 	
 	@Test
 	public void createArmyFromDynamoDB() throws FileNotFoundException, IOException {
-		Army army = createArmy(armySize);
+		ArmyHelper armyHelper = new ArmyHelper();
+		Army army = armyHelper.createArmy(monstersSize, heroesSize);
 				
 		Gson gson = new Gson();    
 	    String json = gson.toJson(army);
@@ -120,42 +123,27 @@ public class BattleTest {
 	
 	@Test
 	public void randomBattle() {
-		Army army = createArmy(getRandomNumberInRange(2000000, 5000000));
-		
+		ArmyHelper armyHelper = new ArmyHelper();
+		BattleHelper battleHelper = new BattleHelper();
+		Army army = armyHelper.createArmy(getRandomNumberInRange(40000, 50000), heroesSize);
+		List<String> phases = new ArrayList<>();
+		phases.add("Attack");
+//		phases.add("Attack");
+//		phases.add("Attack");
+//		phases.add("Defend");
+		battleHelper.resolveBattle(army, phases);
 		
 	}
 	
 	@Test
 	public void rollDice() {
-		BattleHelper helper = new BattleHelper();
 		String diceNumber = "6";
 		String dieSize = "8";
 		String modifier =  "4";
 		for (int i = 0; i < 100000; i++) {
-			Integer result = helper.calculateDamage(diceNumber+"d"+dieSize+"+"+modifier);
+			Integer result = UtilHelper.rollDie(diceNumber+"d"+dieSize+"+"+modifier);
 			Assert.assertTrue(result >= Integer.parseInt(diceNumber)+Integer.parseInt(modifier) && result <= (Integer.parseInt(diceNumber)*Integer.parseInt(dieSize))+Integer.parseInt(modifier));	
 		}
-	}
-	
-	private Army createArmy(int size) {
-		Army army = new Army();
-		List<Hero> heroes = new ArrayList<>();
-		List<Monster> dbMonsters = new ArrayList<>();
-		List<Monster> armyMonsters = new ArrayList<>();
-		
-		DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
-		
-		heroes = mapper.scan(Hero.class, scanExpression);
-		dbMonsters = mapper.scan(Monster.class, scanExpression);
-		
-		army.setId(3);
-		army.setHeroes(heroes);
-		for (int i = 0; i < size; i++) {
-			armyMonsters.add(dbMonsters.get(getRandomNumberInRange(0, dbMonsters.size()-1)));
-		}
-		army.setMonsters(armyMonsters);
-		
-		return army;
 	}
 	
 	private int getRandomNumberInRange(int min, int max) {
