@@ -4,12 +4,15 @@ import java.util.Random;
 
 import org.chaos.ethereal.persistence.Army;
 import org.chaos.ethereal.persistence.BattleReport;
+import org.chaos.ethereal.persistence.Monster;
 
 public class BattleHelper {
 
 	public BattleReport resolveBattle(Army army) {
 		BattleReport report = new BattleReport();
-		
+		for (Monster monster : army.getMonsters()) {
+			
+		}
 		
 		return report;
 	}

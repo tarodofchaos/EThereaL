@@ -11,6 +11,7 @@ public class Monster {
 	private String name;
 	private String level;
 	private String hitpoints;
+	private Integer computedHP;
 	private String armor;
 	private String mainAttack;
 	private String specialAttack;
@@ -45,6 +46,13 @@ public class Monster {
 	}
 	public void setHitpoints(String hitpoints) {
 		this.hitpoints = hitpoints;
+	}
+	
+	public Integer getComputedHP() {
+		return computedHP;
+	}
+	public void setComputedHP(Integer computedHP) {
+		this.computedHP = computedHP;
 	}
 	
 	@DynamoDBAttribute(attributeName="armor")

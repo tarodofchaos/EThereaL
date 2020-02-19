@@ -15,6 +15,9 @@ public class Hero {
 	private Integer strength;
 	private Integer dexterity;
 	private Integer magic;
+	private Integer hitpoints;
+	private Integer damage;
+	private Integer mana;
 	
 	@DynamoDBHashKey(attributeName="id")
 	public Integer getId() {
