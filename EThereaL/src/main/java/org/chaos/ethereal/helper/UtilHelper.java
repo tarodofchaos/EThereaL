@@ -2,6 +2,11 @@ package org.chaos.ethereal.helper;
 
 import java.util.Random;
 
+import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
+import com.amazonaws.services.sns.AmazonSNS;
+import com.amazonaws.services.sns.AmazonSNSClientBuilder;
+import com.amazonaws.services.sns.model.PublishRequest;
+
 public class UtilHelper {
 	
 	public static int getRandomNumberInRange(int min, int max) {
@@ -30,6 +35,13 @@ public class UtilHelper {
 		result += modifier;
 		
 		return result;
+	}
+	
+	public static void sendMessageToSnsTopic(String arn, String message, String format, String subject) {		
+ 		AmazonSNS sns = AmazonSNSClientBuilder.standard().withCredentials(new SystemPropertiesCredentialsProvider()).build();    	
+ 		PublishRequest request = new PublishRequest(arn, message, subject);	        
+ 		request.setMessageStructure(format);
+ 		sns.publish(request);									
 	}
 	
 }

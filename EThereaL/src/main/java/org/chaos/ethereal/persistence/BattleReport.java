@@ -15,7 +15,12 @@ public class BattleReport {
 	private String mostKillingHero;
 	private String mostKillingMonster;
 	private String battleTime;
-	private String hardestBlow;
+	private String hardestBlowHero;
+	private String hardestBlowHeroNo;
+	private String hardestBlowMonster;
+	private String hardestBlowMonsterNo;
+	private String phase;
+	private String biggestHorde;
 	
 	@DynamoDBHashKey(attributeName="id")
 	public Integer getId() {
@@ -65,11 +70,51 @@ public class BattleReport {
 		this.battleTime = battleTime;
 	}
 	
-	@DynamoDBAttribute(attributeName="hardest_blow")
-	public String getHardestBlow() {
-		return hardestBlow;
+	@DynamoDBAttribute(attributeName="hardest_blow_hero_no")
+	public String getHardestBlowHeroNo() {
+		return hardestBlowHeroNo;
 	}
-	public void setHardestBlow(String hardestBlow) {
-		this.hardestBlow = hardestBlow;
+	public void setHardestBlowHeroNo(String hardestBlowHeroNo) {
+		this.hardestBlowHeroNo = hardestBlowHeroNo;
+	}
+	
+	@DynamoDBAttribute(attributeName="phase")
+	public String getPhase() {
+		return phase;
+	}
+	public void setPhase(String phase) {
+		this.phase = phase;
+	}
+	
+	@DynamoDBAttribute(attributeName="hardest_blow_hero")
+	public String getHardestBlowHero() {
+		return hardestBlowHero;
+	}
+	public void setHardestBlowHero(String hardestBlowHero) {
+		this.hardestBlowHero = hardestBlowHero;
+	}
+	
+	@DynamoDBAttribute(attributeName="biggest_horde")
+	public String getBiggestHorde() {
+		return biggestHorde;
+	}
+	public void setBiggestHorde(String biggestHorde) {
+		this.biggestHorde = biggestHorde;
+	}
+	
+	@DynamoDBAttribute(attributeName="hardest_blow_monster")
+	public String getHardestBlowMonster() {
+		return hardestBlowMonster;
+	}
+	public void setHardestBlowMonster(String hardestBlowMonster) {
+		this.hardestBlowMonster = hardestBlowMonster;
+	}
+	
+	@DynamoDBAttribute(attributeName="hardest_blow_monster_no")
+	public String getHardestBlowMonsterNo() {
+		return hardestBlowMonsterNo;
+	}
+	public void setHardestBlowMonsterNo(String hardestBlowMonsterNo) {
+		this.hardestBlowMonsterNo = hardestBlowMonsterNo;
 	}
 }
