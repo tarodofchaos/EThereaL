@@ -20,14 +20,14 @@
         "s3SchemaVersion": "1.0",
         "configurationId": "testConfigRule",
         "bucket": {
-          "name": "sourcebucket",
+          "name": "ethereal-app",
           "ownerIdentity": {
             "principalId": "EXAMPLE"
           },
-          "arn": "arn:aws:s3:::mybucket"
+          "arn": "arn:aws:s3:::ethereal-app"
         },
         "object": {
-          "key": "HappyFace.jpg",
+          "key": "private/army/army1582281452716_adda",
           "size": 1024,
           "eTag": "d41d8cd98f00b204e9800998ecf8427e"
         }

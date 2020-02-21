@@ -27,7 +27,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.github.javafaker.Faker;
 import com.google.gson.Gson;
 
-public class BattleTest {
+public class ArmyTest {
 	
 	String countries[];
 	double probabilities[];
@@ -42,8 +42,6 @@ public class BattleTest {
 	public void setUp() {
 		client = AmazonDynamoDBClientBuilder.standard().withRegion("eu-west-1").withCredentials(new EnvironmentVariableCredentialsProvider()).build();
 		mapper = new DynamoDBMapper(client);
-		faker = new Faker();
-		
 	}
 
 	@Test
@@ -117,37 +115,13 @@ public class BattleTest {
 		fos.write(json.getBytes());
 		fos.flush();
 		fos.close();
-		
-		Army object = gson.fromJson(new FileReader(fileName), Army.class);
 	}
 	
-	@Test
-	public void randomBattle() {
-		ArmyHelper armyHelper = new ArmyHelper();
-		BattleHelper battleHelper = new BattleHelper();
-		Army army = armyHelper.createArmy(getRandomNumberInRange(40000, 50000), heroesSize);
-		List<String> phases = new ArrayList<>();
-		phases.add("Attack");
-//		phases.add("Attack");
-//		phases.add("Attack");
-		phases.add("Defend");
-		battleHelper.resolveBattle(army, phases);
-		
-	}
+	 @Test
+	 public void createArmyFromFile() {
+		 ArmyHelper armyHelper = new ArmyHelper();
+		 Army army = armyHelper.createArmyFromFile("army_1582281452716");
+		 System.out.println(army.getHeroes());
+	 }
 	
-	@Test
-	public void rollDice() {
-		String diceNumber = "6";
-		String dieSize = "8";
-		String modifier =  "4";
-		for (int i = 0; i < 100000; i++) {
-			Integer result = UtilHelper.rollDie(diceNumber+"d"+dieSize+"+"+modifier);
-			Assert.assertTrue(result >= Integer.parseInt(diceNumber)+Integer.parseInt(modifier) && result <= (Integer.parseInt(diceNumber)*Integer.parseInt(dieSize))+Integer.parseInt(modifier));	
-		}
-	}
-	
-	private int getRandomNumberInRange(int min, int max) {
-		Random r = new Random();
-		return r.nextInt((max - min) + 1) + min;
-	}
 }

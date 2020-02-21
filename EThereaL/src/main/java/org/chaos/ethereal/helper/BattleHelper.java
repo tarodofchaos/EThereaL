@@ -1,8 +1,9 @@
 package org.chaos.ethereal.helper;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -17,24 +18,24 @@ public class BattleHelper {
 	public BattleReport resolveBattle(Army army, List<String> phases) {
 		report = new BattleReport();
 		
-		army.getMonsters().stream().collect(Collectors
-				.groupingBy(Monster::getName, Collectors.counting()));
-		//Getting the biggest horde for this battle
-//		report.setBiggestHorde(String.join(",", army.getMonsters().stream().collect(Collectors.groupingBy(Monster::getName),
-//				Collectors.counting()).keySet()));
+		report.setBiggestHorde(getBiggestHorde(army));
 		
 		for (String phase : phases) {
 			switch (phase) {
-			case "Attack":
+			//Attack
+			case "A":
 				resolveAttackPhase(army);
 				break;
-			case "Defend":
+			//Defend
+			case "D":
 				resolveDefendPhase(army);
 				break;
-			case "Magic":
+			//Magic
+			case "M":
 				resolveMagicPhase(army);
 				break;
-			case "Hold":
+			//Hold
+			case "H":
 				resolveHoldPhase(army);
 				break;
 
@@ -43,6 +44,23 @@ public class BattleHelper {
 			}
 		}
 		return report;
+	}
+	
+	private String getBiggestHorde(Army army) {
+		String biggestHorde = army.getMonsters().stream()
+		        .map(Monster::getName).filter(Objects::nonNull)
+		        .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+		        .entrySet().stream().max(Map.Entry.comparingByValue())
+		        .map(Map.Entry::getKey).orElse("Many hordes");
+		Long biggestHordeSize =  army.getMonsters().stream()
+		        .map(Monster::getName).filter(Objects::nonNull)
+		        .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+		        .entrySet().stream().max(Map.Entry.comparingByValue())
+		        .map(Map.Entry::getValue).orElse(-1L);
+		       
+		StringBuilder sb = new StringBuilder();
+		sb.append(biggestHordeSize.toString()).append(" ").append(biggestHorde);
+		return sb.toString();
 	}
 	
 	private void resolveHoldPhase(Army army) {
@@ -82,36 +100,31 @@ public class BattleHelper {
 	}
 
 	private void resolveAttackPhase(Army army) {
-		Integer totalDmg = army.getHeroes().stream().mapToInt(Hero::getDamage).sum();
 		Integer critical = criticalHit(army.getHeroes().size());
 		StringBuilder sb = new StringBuilder();
 		Hero hardestBlowHero = army.getHeroes().get(critical);
-		hardestBlowHero.setDamage(hardestBlowHero.getDamage()*20);
+		hardestBlowHero.setDamage(hardestBlowHero.getDamage()*3);
+		Integer totalDmg = army.getHeroes().stream().mapToInt(Hero::getDamage).sum();
 		report.setHardestBlowHeroNo(String.valueOf(hardestBlowHero.getDamage()));
 		sb.append(hardestBlowHero.getName()).append(" the ").append(hardestBlowHero.getRace()).append(" ").append(hardestBlowHero.getClazz());
 		report.setHardestBlowHero(sb.toString());
 		sb.setLength(0);
-		List<Monster> deadMonsters = new ArrayList<>();
+		Integer deadMonsters = 0;
 		for (Monster monster : army.getMonsters()) {
 			if (totalDmg > monster.getComputedHP()) {
 				totalDmg -= monster.getComputedHP();
-				deadMonsters.add(monster);
+				deadMonsters++;
 			}else {
 				break;
 			}
 		}
-		hardestBlowHero.setDamage(hardestBlowHero.getDamage()/20);
-		army.getMonsters().removeAll(deadMonsters);
-		report.setMonsterCasualties(String.valueOf(deadMonsters.size()));
+		hardestBlowHero.setDamage(hardestBlowHero.getDamage()/3);
+		army.setMonsters(army.getMonsters().subList(deadMonsters-1, army.getMonsters().size()-1));
+		report.setMonsterCasualties(String.valueOf(deadMonsters));
 	}
 
 	private Integer criticalHit(Integer attackerNo) {
 		return UtilHelper.getRandomNumberInRange(0, attackerNo-1);
 	}
 	
-	public Integer resolveBlow(Integer damageDelta, Integer armorDelta) {
-		Integer result = 0;
-		
-		return result;
-	}
 }

@@ -14,4 +14,7 @@ public class AppConstants {
 	public static final String STRENGTH = "Strength";
 	public static final String DEXTERITY = "Dexterity";
 	public static final String MAGIC = "Magic";
+	
+	public static final String S3_ARMY_PATH = "private/army";
+	public static final String S3_BUCKET = "ethereal-app";
 }

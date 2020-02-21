@@ -26,7 +26,7 @@ import com.amazonaws.services.s3.model.S3Object;
 @RunWith(MockitoJUnitRunner.class)
 public class EThereaLHordeHandlerTest {
 
-    private final String CONTENT_TYPE = "image/jpeg";
+    private final String CONTENT_TYPE = "text/json";
     private S3Event event;
 
     @Mock
