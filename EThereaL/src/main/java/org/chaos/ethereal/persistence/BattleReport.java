@@ -11,16 +11,19 @@ public class BattleReport {
 
 	private Integer id;
 	private List<Hero> heroCasualties;
-	private String monsterCasualties;
+	private Integer monsterCasualties;
 	private String mostKillingHero;
 	private String mostKillingMonster;
 	private String battleTime;
 	private String hardestBlowHero;
-	private String hardestBlowHeroNo;
+	private Integer hardestBlowHeroNo;
 	private String hardestBlowMonster;
-	private String hardestBlowMonsterNo;
+	private Integer hardestBlowMonsterNo;
 	private String phase;
 	private String biggestHorde;
+	private String winner;
+	private Integer startingHeroes;
+	private Integer startingMonsters;
 	
 	@DynamoDBHashKey(attributeName="id")
 	public Integer getId() {
@@ -39,10 +42,10 @@ public class BattleReport {
 	}
 	
 	@DynamoDBAttribute(attributeName="monster_casualties")
-	public String getMonsterCasualties() {
+	public Integer getMonsterCasualties() {
 		return monsterCasualties;
 	}
-	public void setMonsterCasualties(String monsterCasualties) {
+	public void setMonsterCasualties(Integer monsterCasualties) {
 		this.monsterCasualties = monsterCasualties;
 	}
 	
@@ -71,10 +74,10 @@ public class BattleReport {
 	}
 	
 	@DynamoDBAttribute(attributeName="hardest_blow_hero_no")
-	public String getHardestBlowHeroNo() {
+	public Integer getHardestBlowHeroNo() {
 		return hardestBlowHeroNo;
 	}
-	public void setHardestBlowHeroNo(String hardestBlowHeroNo) {
+	public void setHardestBlowHeroNo(Integer hardestBlowHeroNo) {
 		this.hardestBlowHeroNo = hardestBlowHeroNo;
 	}
 	
@@ -111,10 +114,34 @@ public class BattleReport {
 	}
 	
 	@DynamoDBAttribute(attributeName="hardest_blow_monster_no")
-	public String getHardestBlowMonsterNo() {
+	public Integer getHardestBlowMonsterNo() {
 		return hardestBlowMonsterNo;
 	}
-	public void setHardestBlowMonsterNo(String hardestBlowMonsterNo) {
+	public void setHardestBlowMonsterNo(Integer hardestBlowMonsterNo) {
 		this.hardestBlowMonsterNo = hardestBlowMonsterNo;
+	}
+	
+	@DynamoDBAttribute(attributeName="winner")
+	public String getWinner() {
+		return winner;
+	}
+	public void setWinner(String winner) {
+		this.winner = winner;
+	}
+	
+	@DynamoDBAttribute(attributeName="starting_heroes")
+	public Integer getStartingHeroes() {
+		return startingHeroes;
+	}
+	public void setStartingHeroes(Integer startingHeroes) {
+		this.startingHeroes = startingHeroes;
+	}
+	
+	@DynamoDBAttribute(attributeName="starting_monsters")
+	public Integer getStartingMonsters() {
+		return startingMonsters;
+	}
+	public void setStartingMonsters(Integer startingMonsters) {
+		this.startingMonsters = startingMonsters;
 	}
 }

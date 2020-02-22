@@ -5,8 +5,11 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+import org.chaos.ethereal.persistence.BattleReport;
+
 import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.GetObjectRequest;
@@ -75,6 +78,10 @@ public class UtilHelper {
 		S3Object object = s3Client.getObject(new GetObjectRequest(bucket, key));
 
 		return object.getObjectContent();
+	}
+
+	public static String getTableName(Class<? extends BattleReport> clazz) {
+		return clazz.getDeclaredAnnotation(DynamoDBTable.class).tableName().toString();
 	}
 	
 }

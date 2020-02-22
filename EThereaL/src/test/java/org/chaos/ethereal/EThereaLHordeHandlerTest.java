@@ -13,9 +13,11 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
@@ -30,7 +32,7 @@ public class EThereaLHordeHandlerTest {
     private S3Event event;
 
     @Mock
-    private AmazonS3 s3Client;
+    private AmazonS3 s3Client = AmazonS3ClientBuilder.standard().withRegion(Regions.EU_WEST_1).build();;
     @Mock
     private S3Object s3Object;
 
@@ -59,7 +61,7 @@ public class EThereaLHordeHandlerTest {
 
     @Test
     public void testEThereaLHordeHandler() {
-        EThereaLHordeHandler handler = new EThereaLHordeHandler(s3Client);
+        EThereaLHordeHandler handler = new EThereaLHordeHandler();
         Context ctx = createContext();
 
         String output = handler.handleRequest(event, ctx);

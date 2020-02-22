@@ -24,6 +24,7 @@ import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.github.javafaker.Faker;
 import com.google.gson.Gson;
 
@@ -37,6 +38,7 @@ public class BattleTest {
 	Map<String, String> userCountry;
 	int monstersSize = 1000;
 	int heroesSize = 10;
+	LambdaLogger logger = (new TestContext()).getLogger();
 	
 	@Before
 	public void setUp() {
@@ -105,7 +107,7 @@ public class BattleTest {
 	
 	@Test
 	public void createArmyFromDynamoDB() throws FileNotFoundException, IOException {
-		ArmyHelper armyHelper = new ArmyHelper();
+		ArmyHelper armyHelper = new ArmyHelper(logger);
 		Army army = armyHelper.createArmy(monstersSize, heroesSize);
 				
 		Gson gson = new Gson();    
@@ -117,14 +119,12 @@ public class BattleTest {
 		fos.write(json.getBytes());
 		fos.flush();
 		fos.close();
-		
-		Army object = gson.fromJson(new FileReader(fileName), Army.class);
 	}
 	
 	@Test
 	public void randomBattle() {
-		ArmyHelper armyHelper = new ArmyHelper();
-		BattleHelper battleHelper = new BattleHelper();
+		ArmyHelper armyHelper = new ArmyHelper(logger);
+		BattleHelper battleHelper = new BattleHelper(logger);
 		Army army = armyHelper.createArmy(getRandomNumberInRange(40000, 50000), heroesSize);
 		List<String> phases = new ArrayList<>();
 		phases.add("Attack");

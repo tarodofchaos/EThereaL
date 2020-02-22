@@ -3,20 +3,15 @@ package org.chaos.ethereal;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.chaos.ethereal.helper.ArmyHelper;
-import org.chaos.ethereal.helper.BattleHelper;
-import org.chaos.ethereal.helper.UtilHelper;
 import org.chaos.ethereal.persistence.Army;
 import org.chaos.ethereal.persistence.Hero;
 import org.chaos.ethereal.persistence.Monster;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,6 +19,7 @@ import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.github.javafaker.Faker;
 import com.google.gson.Gson;
 
@@ -35,8 +31,9 @@ public class ArmyTest {
 	DynamoDBMapper mapper;
 	Faker faker;
 	Map<String, String> userCountry;
-	int monstersSize = 1000;
-	int heroesSize = 10;
+	int monstersSize = 2000000;
+	int heroesSize = 130;
+	LambdaLogger logger = (new TestContext()).getLogger();
 	
 	@Before
 	public void setUp() {
@@ -103,7 +100,7 @@ public class ArmyTest {
 	
 	@Test
 	public void createArmyFromDynamoDB() throws FileNotFoundException, IOException {
-		ArmyHelper armyHelper = new ArmyHelper();
+		ArmyHelper armyHelper = new ArmyHelper(logger);
 		Army army = armyHelper.createArmy(monstersSize, heroesSize);
 				
 		Gson gson = new Gson();    
@@ -119,7 +116,7 @@ public class ArmyTest {
 	
 	 @Test
 	 public void createArmyFromFile() {
-		 ArmyHelper armyHelper = new ArmyHelper();
+		 ArmyHelper armyHelper = new ArmyHelper(logger);
 		 Army army = armyHelper.createArmyFromFile("army_1582281452716");
 		 System.out.println(army.getHeroes());
 	 }
