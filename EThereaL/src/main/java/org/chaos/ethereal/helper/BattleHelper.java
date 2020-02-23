@@ -59,7 +59,7 @@ public class BattleHelper {
 	
 	private void determineWinner() {
 		if ((report.getStartingMonsters() == report.getMonsterCasualties()) || 
-				((report.getStartingMonsters()-report.getMonsterCasualties())/10<(report.getStartingHeroes()-report.getHeroCasualties().size()))) {
+				((report.getStartingMonsters()-report.getMonsterCasualties())/20<(report.getStartingHeroes()-report.getHeroCasualties().size()))) {
 			report.setWinner(AppConstants.HEROES);
 		} else {
 			report.setWinner(AppConstants.MONSTERS);
@@ -68,6 +68,8 @@ public class BattleHelper {
 	}
 
 	private String getBiggestHorde(Army army) {
+		//These two streams collect the most frequent mosnter and its number. Should more than one exist, an arbitrary string and number are returned.
+		//Disclaimer: use of Function.identity() collector was blatantly copied from StackOverflow since it was the best way to retrieve the key,value pair to use the mapping function
 		String biggestHorde = army.getMonsters().stream()
 		        .map(Monster::getName).filter(Objects::nonNull)
 		        .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
@@ -95,10 +97,16 @@ public class BattleHelper {
 	}
 
 	private void resolveDefendPhase(Army army) {
+		//Stream to get all the properties for the dmg dice from monsters.
 		List<String> diceDmg = army.getMonsters().stream().map(Monster::getMainAttack).collect(Collectors.toList());
 		List<Integer> totalDmgList = new ArrayList<>();
 		List<Hero> deadHeroes = new ArrayList<>();
+		
+		//Stream+Lambda expression to add all the dice rolls at once
+		//I get them on a list to select a random critical hit before adding them up
 		diceDmg.stream().forEach(m -> totalDmgList.add(UtilHelper.rollDie(m)));
+		
+		//Setting up the report for the final load phase
 		Integer critical = criticalHit(totalDmgList.size());
 		totalDmgList.set(critical, totalDmgList.get(critical)*20);
 		report.setHardestBlowMonsterNo(totalDmgList.get(critical));
@@ -107,7 +115,11 @@ public class BattleHelper {
 		sb.append(hardestBlowMonster.getName());
 		report.setHardestBlowMonster(sb.toString());
 		sb.setLength(0);
+		
+		//Calculating all the damage
 		Integer totalDmg = totalDmgList.stream().mapToInt(Integer::intValue).sum();
+		
+		//Using a traditional for loop to be able to break it as soon as no more damage to inflict is left
 		for (Hero hero : army.getHeroes()) {
 			if (totalDmg > hero.getHitpoints()) {
 				totalDmg -= hero.getHitpoints();
@@ -121,16 +133,22 @@ public class BattleHelper {
 	}
 
 	private void resolveAttackPhase(Army army) {
+		//Arbitrarily selecting a hero to perform a critical hit
 		Integer critical = criticalHit(army.getHeroes().size());
 		StringBuilder sb = new StringBuilder();
 		Hero hardestBlowHero = army.getHeroes().get(critical);
 		hardestBlowHero.setDamage(hardestBlowHero.getDamage()*3);
+		
+		//Summing up all damage with a simple stream
 		Integer totalDmg = army.getHeroes().stream().mapToInt(Hero::getDamage).sum();
+		
+		//Preparing report for load phase
 		report.setHardestBlowHeroNo(hardestBlowHero.getDamage());
 		sb.append(hardestBlowHero.getName()).append(" the ").append(hardestBlowHero.getRace()).append(" ").append(hardestBlowHero.getClazz());
 		report.setHardestBlowHero(sb.toString());
 		sb.setLength(0);
 		Integer deadMonsters = 0;
+		//Using a traditional for loop to be able to break it as soon as no more damage to inflict is left
 		for (Monster monster : army.getMonsters()) {
 			if (totalDmg > monster.getComputedHP()) {
 				totalDmg -= monster.getComputedHP();
@@ -140,6 +158,8 @@ public class BattleHelper {
 			}
 		}
 		hardestBlowHero.setDamage(hardestBlowHero.getDamage()/3);
+		
+		//We remove all the dead monsters from the main army list
 		army.setMonsters(army.getMonsters().subList(deadMonsters-1, army.getMonsters().size()-1));
 		report.setMonsterCasualties(deadMonsters);
 	}

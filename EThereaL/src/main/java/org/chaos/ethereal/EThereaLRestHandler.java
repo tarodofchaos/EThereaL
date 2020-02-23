@@ -49,6 +49,8 @@ public class EThereaLRestHandler implements RequestStreamHandler {
 		mapper.setSerializationInclusion(Include.NON_NULL);
 		JSONObject event;
 		BattleReport report = new BattleReport();
+		//Workaround to changed Amazon protected environment variables for authentication
+        //This is just a convenient way of building AWS SDK clients
 		System.setProperty("aws.accessKeyId", System.getenv("aws_accessKeyId"));
         System.setProperty("aws.secretKey", System.getenv("aws_secretKey"));
 		try {
@@ -61,12 +63,23 @@ public class EThereaLRestHandler implements RequestStreamHandler {
 				Integer monsters = Integer.parseInt((String) pps.get("monsters"));
 				List<String> phases = Arrays.asList(((String)pps.get("phases")).split(""));
 				
+				//We generate the POJO from the provided parameters. This would be the Extract phase
 				Army army = armyHelper.createArmy(monsters, heroes);
+				
+				//We validate the provided file. This is part of the Extract phase
+	            armyHelper.validateArmy(army);
+	            
+	          //This is the start of the Transform phase
 				report = battleHelper.resolveBattle(army, phases);
+				
+				//After all the transformations, a report is generated and save. This is the Load phase
 	            report.setId(SequenceHelper.getNewSeq(AmazonUtils.getTableName(report.getClass())));
 	            dbMapper.save(report);
+	            
+	          //To finish, an email is sent to all the subscribers of the SNS topic
 	            AmazonUtils.sendMessageToSnsTopic(AppConstants.SNS_SUCCESS_ARN_TOPIC, report.toString(), null, "Battle success");
 				
+	          //Since it is also a REST call, an status code and a message are returned to the caller
 				OutputMessageDTO output = new OutputMessageDTO();
 				output.setSuccessful(true);
 				event = new JSONObject();
@@ -76,10 +89,12 @@ public class EThereaLRestHandler implements RequestStreamHandler {
 				writer.write(event.toJSONString());
 				writer.close();
 			}else {
-				throw new NullPointerException();
+				throw new Exception("All parameters must be sent");
 			}
 		
 		} catch (Exception e) {
+			//Exceptions are converted and sent via email to SNS subscribers
+			//Since it is also a REST call, an status code and a message are returned to the caller
 			e.printStackTrace();
 			AmazonUtils.sendMessageToSnsTopic(AppConstants.SNS_ERROR_ARN_TOPIC, e.getMessage(), null, "Error in battle");
 			OutputMessageDTO output = new OutputMessageDTO();

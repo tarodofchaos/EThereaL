@@ -1,9 +1,7 @@
 package org.chaos.ethereal;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -99,7 +97,7 @@ public class ArmyTest {
 	}
 	
 	@Test
-	public void createArmyFromDynamoDB() throws FileNotFoundException, IOException {
+	public void createArmyFromDynamoDB() throws Exception {
 		ArmyHelper armyHelper = new ArmyHelper(logger);
 		Army army = armyHelper.createArmy(monstersSize, heroesSize);
 				
