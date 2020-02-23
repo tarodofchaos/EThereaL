@@ -66,6 +66,8 @@ public class EThereaLHordeHandler implements RequestHandler<S3Event, String> {
         initHandler(context);
     	context.getLogger().log("Received event: " + event);
         List<String> phases;
+        //Workaround to changed Amazon protected environment variables for authentication
+        //This is just a convenient way of building AWS SDK clients
         System.setProperty("aws.accessKeyId", DECRYPTED_KEY);
         System.setProperty("aws.secretKey", DECRYPTED_SECRET_KEY);
 
@@ -75,16 +77,25 @@ public class EThereaLHordeHandler implements RequestHandler<S3Event, String> {
         
         BattleReport report = new BattleReport();
         try {
+        	//We generate the POJO from the provided file. This would be the Extract phase
             Army army = armyHelper.createArmyFromIS(AmazonUtils.downloadObject(bucket, key));
             context.getLogger().log("Army created");
+            //We validate the provided file. This is part of the Extract phase
             armyHelper.validateArmy(army);
+            
+            //A conveniently formatted filename gives us the battle phases. This is the start of the Transform phase
             phases = Arrays.asList(key.split("_")[1].split(""));
             report = battleHelper.resolveBattle(army, phases);
+            
+            //After all the transformations, a report is generated and save. This is the Load phase
             report.setId(SequenceHelper.getNewSeq(AmazonUtils.getTableName(report.getClass())));
             mapper.save(report);
+            
+            //To finish, an email is sent to all the subscribers of the SNS topic
             AmazonUtils.sendMessageToSnsTopic(AppConstants.SNS_SUCCESS_ARN_TOPIC, report.toString(), null, "Battle success");
             return "OK";
         } catch (AmazonS3Exception e) {
+        	//Exceptions are converted and sent via email to SNS subscribers
             e.printStackTrace();
             context.getLogger().log(String.format(
                 "Error getting object %s from bucket %s. Make sure they exist and"
@@ -94,10 +105,9 @@ public class EThereaLHordeHandler implements RequestHandler<S3Event, String> {
                             + " your bucket is in the same region as this function.", key, bucket), null, "Error in battle");
             throw e;
         } catch (Exception e1) {
+        	//Exceptions are converted and sent via email to SNS subscribers
         	 e1.printStackTrace();
-             context.getLogger().log(String.format(
-                 "Error getting object %s from bucket %s. Make sure they exist and"
-                 + " your bucket is in the same region as this function.", key, bucket));
+             context.getLogger().log(e1.getMessage());
              AmazonUtils.sendMessageToSnsTopic(AppConstants.SNS_ERROR_ARN_TOPIC, String.format(
                      e1.getMessage(), key, bucket), null, "Error in battle");
              throw e1;
