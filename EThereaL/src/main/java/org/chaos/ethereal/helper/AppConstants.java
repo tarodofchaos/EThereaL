@@ -23,6 +23,8 @@ public class AppConstants {
 
 	public static final String DYNAMODB_DEFAULT_REGION = "eu-west-1";
 	public static final String DYNAMODB_DEFAULT_NODE = "https://dynamodb.eu-west-1.amazonaws.com";
+	public static final String SNS_SUCCESS_ARN_TOPIC = "arn:aws:sns:eu-west-1:928494240687:ethereal-battle_success";
+	public static final String SNS_ERROR_ARN_TOPIC = "arn:aws:sns:eu-west-1:928494240687:ethereal-battle_error";
 
 	public static final String TABLE_ETHEREAL_ID_GENERATOR = "ethereal_id_generator";
 }

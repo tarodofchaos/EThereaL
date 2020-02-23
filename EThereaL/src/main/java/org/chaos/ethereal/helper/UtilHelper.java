@@ -1,22 +1,8 @@
 package org.chaos.ethereal.helper;
 
-import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
-
-import org.chaos.ethereal.persistence.BattleReport;
-
-import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.AmazonSNSClientBuilder;
-import com.amazonaws.services.sns.model.PublishRequest;
 
 public class UtilHelper {
 	
@@ -50,38 +36,11 @@ public class UtilHelper {
 		}
 		
 		for (int i = 0; i < diceNumber; i++) {
-			result += (r.nextInt((dieSize - 1) + 1) + 1);
+			result += (r.nextInt(dieSize  + 1));
 		}
 		result += modifier;
 		
 		return result;
-	}
-	
-	public static void sendMessageToSnsTopic(String arn, String message, String format, String subject) {		
- 		AmazonSNS sns = AmazonSNSClientBuilder.standard().withCredentials(new SystemPropertiesCredentialsProvider()).build();    	
- 		PublishRequest request = new PublishRequest(arn, message, subject);	        
- 		request.setMessageStructure(format);
- 		sns.publish(request);									
-	}
-	
-	public static InputStream downloadObject(String bucket, String path, String fileName) {
-		String key = path + "/" + fileName;
-
-		AmazonS3 s3Client = AmazonS3ClientBuilder.standard().withRegion(Regions.EU_WEST_1).build();
-		S3Object object = s3Client.getObject(new GetObjectRequest(bucket, key));
-
-		return object.getObjectContent();
-	}
-	
-	public static InputStream downloadObject(String bucket, String key) {
-		AmazonS3 s3Client = AmazonS3ClientBuilder.standard().withRegion(Regions.EU_WEST_1).build();
-		S3Object object = s3Client.getObject(new GetObjectRequest(bucket, key));
-
-		return object.getObjectContent();
-	}
-
-	public static String getTableName(Class<? extends BattleReport> clazz) {
-		return clazz.getDeclaredAnnotation(DynamoDBTable.class).tableName().toString();
 	}
 	
 }
