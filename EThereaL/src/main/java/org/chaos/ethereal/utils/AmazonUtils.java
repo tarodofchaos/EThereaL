@@ -1,4 +1,4 @@
-package org.chaos.ethereal.helper;
+package org.chaos.ethereal.utils;
 
 import java.io.InputStream;
 import java.util.Arrays;

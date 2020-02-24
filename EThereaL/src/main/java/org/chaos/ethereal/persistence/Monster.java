@@ -1,5 +1,7 @@
 package org.chaos.ethereal.persistence;
 
+import org.chaos.ethereal.persistence.annotations.Validate;
+
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
@@ -8,13 +10,20 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 public class Monster {
 
 	private Integer id;
+	@Validate(dbname="name")
 	private String name;
+	@Validate(dbname="level")
 	private String level;
+	@Validate(dbname="hitpoints")
 	private String hitpoints;
 	private Integer computedHP;
+	@Validate(dbname="armor")
 	private String armor;
+	@Validate(dbname="main_attack")
 	private String mainAttack;
+	@Validate(dbname="special_attack")
 	private String specialAttack;
+	private Integer armyId;
 	
 	@DynamoDBHashKey(attributeName="id")
 	public Integer getId() {
@@ -77,6 +86,13 @@ public class Monster {
 	}
 	public void setSpecialAttack(String specialAttack) {
 		this.specialAttack = specialAttack;
+	}
+	
+	public Integer getArmyId() {
+		return armyId;
+	}
+	public void setArmyId(Integer armyId) {
+		this.armyId = armyId;
 	}
 	
 	

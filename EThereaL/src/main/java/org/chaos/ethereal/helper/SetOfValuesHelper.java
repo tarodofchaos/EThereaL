@@ -3,8 +3,8 @@ package org.chaos.ethereal.helper;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.chaos.ethereal.persistence.DynamoDBClientBuilder;
 import org.chaos.ethereal.persistence.SetOfValues;
+import org.chaos.ethereal.persistence.utils.DynamoDBClientBuilder;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;

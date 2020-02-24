@@ -9,10 +9,10 @@ import java.util.Random;
 
 import org.chaos.ethereal.helper.ArmyHelper;
 import org.chaos.ethereal.helper.BattleHelper;
-import org.chaos.ethereal.helper.UtilHelper;
 import org.chaos.ethereal.persistence.Army;
 import org.chaos.ethereal.persistence.Hero;
 import org.chaos.ethereal.persistence.Monster;
+import org.chaos.ethereal.utils.UtilHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

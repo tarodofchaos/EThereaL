@@ -2,7 +2,7 @@ package org.chaos.ethereal.helper;
 
 import java.math.BigDecimal;
 
-import org.chaos.ethereal.persistence.DynamoDBClientBuilder;
+import org.chaos.ethereal.persistence.utils.DynamoDBClientBuilder;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;

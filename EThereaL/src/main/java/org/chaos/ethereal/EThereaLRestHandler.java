@@ -7,15 +7,17 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
-import org.chaos.ethereal.helper.AmazonUtils;
 import org.chaos.ethereal.helper.AppConstants;
 import org.chaos.ethereal.helper.ArmyHelper;
 import org.chaos.ethereal.helper.BattleHelper;
 import org.chaos.ethereal.helper.SequenceHelper;
 import org.chaos.ethereal.persistence.Army;
 import org.chaos.ethereal.persistence.BattleReport;
+import org.chaos.ethereal.utils.AmazonUtils;
+import org.chaos.ethereal.utils.UtilHelper;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -44,6 +46,7 @@ public class EThereaLRestHandler implements RequestStreamHandler {
     
     @Override
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
+    	Date d1 = new Date();
     	initHandler(context);
     	ObjectMapper mapper = new ObjectMapper();
 		mapper.setSerializationInclusion(Include.NON_NULL);
@@ -74,6 +77,8 @@ public class EThereaLRestHandler implements RequestStreamHandler {
 				
 				//After all the transformations, a report is generated and save. This is the Load phase
 	            report.setId(SequenceHelper.getNewSeq(AmazonUtils.getTableName(report.getClass())));
+	            String miliseconds = UtilHelper.getSecondsAndMillisecondsDelta(d1, new Date());	
+	            report.setBattleTime(miliseconds);
 	            dbMapper.save(report);
 	            
 	          //To finish, an email is sent to all the subscribers of the SNS topic

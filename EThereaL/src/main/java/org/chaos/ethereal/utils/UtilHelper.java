@@ -1,5 +1,6 @@
-package org.chaos.ethereal.helper;
+package org.chaos.ethereal.utils;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -43,4 +44,16 @@ public class UtilHelper {
 		return result;
 	}
 	
+	public static String getSecondsAndMillisecondsDelta(Date d1, Date d2) {
+		long seconds = getSecondsDelta(d1,d2); 
+		return seconds + " secs. " +  (getMillisecondsDelta(d1,d2) - (seconds * 1000)) + " millis.";
+	}	
+	
+	public static long getSecondsDelta(Date d1, Date d2) {
+		return (d2.getTime() - d1.getTime()) / 1000;
+	}
+	
+	public static long getMillisecondsDelta(Date d1, Date d2) {
+		return d2.getTime() - d1.getTime();
+	}	
 }

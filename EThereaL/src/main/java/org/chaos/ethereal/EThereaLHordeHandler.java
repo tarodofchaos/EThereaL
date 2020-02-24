@@ -3,15 +3,17 @@ package org.chaos.ethereal;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
-import org.chaos.ethereal.helper.AmazonUtils;
 import org.chaos.ethereal.helper.AppConstants;
 import org.chaos.ethereal.helper.ArmyHelper;
 import org.chaos.ethereal.helper.BattleHelper;
 import org.chaos.ethereal.helper.SequenceHelper;
 import org.chaos.ethereal.persistence.Army;
 import org.chaos.ethereal.persistence.BattleReport;
+import org.chaos.ethereal.utils.AmazonUtils;
+import org.chaos.ethereal.utils.UtilHelper;
 
 import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
 import com.amazonaws.regions.Regions;
@@ -24,7 +26,6 @@ import com.amazonaws.services.kms.model.DecryptRequest;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
-import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.util.Base64;
 
 public class EThereaLHordeHandler implements RequestHandler<S3Event, String> {
@@ -63,7 +64,8 @@ public class EThereaLHordeHandler implements RequestHandler<S3Event, String> {
 
     @Override
     public String handleRequest(S3Event event, Context context) {
-        initHandler(context);
+    	Date d1 = new Date();
+    	initHandler(context);
     	context.getLogger().log("Received event: " + event);
         List<String> phases;
         //Workaround to changed Amazon protected environment variables for authentication
@@ -89,28 +91,20 @@ public class EThereaLHordeHandler implements RequestHandler<S3Event, String> {
             
             //After all the transformations, a report is generated and save. This is the Load phase
             report.setId(SequenceHelper.getNewSeq(AmazonUtils.getTableName(report.getClass())));
+            String miliseconds = UtilHelper.getSecondsAndMillisecondsDelta(d1, new Date());	
+            report.setBattleTime(miliseconds);
             mapper.save(report);
             
             //To finish, an email is sent to all the subscribers of the SNS topic
             AmazonUtils.sendMessageToSnsTopic(AppConstants.SNS_SUCCESS_ARN_TOPIC, report.toString(), null, "Battle success");
             return "OK";
-        } catch (AmazonS3Exception e) {
+        } catch (Exception e) {
         	//Exceptions are converted and sent via email to SNS subscribers
-            e.printStackTrace();
-            context.getLogger().log(String.format(
-                "Error getting object %s from bucket %s. Make sure they exist and"
-                + " your bucket is in the same region as this function.", key, bucket));
-            AmazonUtils.sendMessageToSnsTopic(AppConstants.SNS_ERROR_ARN_TOPIC, String.format(
-                    "Error getting object %s from bucket %s. Make sure they exist and"
-                            + " your bucket is in the same region as this function.", key, bucket), null, "Error in battle");
-            throw e;
-        } catch (Exception e1) {
-        	//Exceptions are converted and sent via email to SNS subscribers
-        	 e1.printStackTrace();
-             context.getLogger().log(e1.getMessage());
+        	 e.printStackTrace();
+             context.getLogger().log(e.getMessage());
              AmazonUtils.sendMessageToSnsTopic(AppConstants.SNS_ERROR_ARN_TOPIC, String.format(
-                     e1.getMessage(), key, bucket), null, "Error in battle");
-             throw e1;
+                     e.getMessage(), key, bucket), null, "Error in battle");
+             return "KO";
         }
     }
 

@@ -1,6 +1,7 @@
 package org.chaos.ethereal.persistence;
 
 import org.chaos.ethereal.helper.AppConstants;
+import org.chaos.ethereal.persistence.annotations.Validate;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
@@ -10,12 +11,19 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 public class Hero {
 
 	private Integer id;
+	@Validate(dbname="name")
 	private String name;
+	@Validate(dbname="race")
 	private String race;
+	@Validate(dbname="gender")
 	private String gender;
+	@Validate(dbname="clazz")
 	private String clazz;
+	@Validate(dbname="str")
 	private Integer strength;
+	@Validate(dbname="dex")
 	private Integer dexterity;
+	@Validate(dbname="mag")
 	private Integer magic;
 	private Integer hitpoints;
 	private Integer damage;

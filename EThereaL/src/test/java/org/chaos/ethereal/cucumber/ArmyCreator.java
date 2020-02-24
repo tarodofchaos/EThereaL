@@ -1,7 +1,7 @@
 package org.chaos.ethereal.cucumber;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertTrue;
 
 import org.chaos.ethereal.TestContext;
 import org.chaos.ethereal.helper.ArmyHelper;

@@ -1,4 +1,4 @@
-package org.chaos.ethereal.persistence;
+package org.chaos.ethereal.persistence.utils;
 
 import org.chaos.ethereal.helper.AppConstants;
 

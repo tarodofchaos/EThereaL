@@ -11,6 +11,7 @@ import org.chaos.ethereal.persistence.Army;
 import org.chaos.ethereal.persistence.BattleReport;
 import org.chaos.ethereal.persistence.Hero;
 import org.chaos.ethereal.persistence.Monster;
+import org.chaos.ethereal.utils.UtilHelper;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 
@@ -136,6 +137,7 @@ public class BattleHelper {
 		//Arbitrarily selecting a hero to perform a critical hit
 		Integer critical = criticalHit(army.getHeroes().size());
 		StringBuilder sb = new StringBuilder();
+		List<Monster> deadMonsters = new ArrayList<>();
 		Hero hardestBlowHero = army.getHeroes().get(critical);
 		hardestBlowHero.setDamage(hardestBlowHero.getDamage()*3);
 		
@@ -147,12 +149,12 @@ public class BattleHelper {
 		sb.append(hardestBlowHero.getName()).append(" the ").append(hardestBlowHero.getRace()).append(" ").append(hardestBlowHero.getClazz());
 		report.setHardestBlowHero(sb.toString());
 		sb.setLength(0);
-		Integer deadMonsters = 0;
+//		Integer deadMonsters = 0;
 		//Using a traditional for loop to be able to break it as soon as no more damage to inflict is left
 		for (Monster monster : army.getMonsters()) {
 			if (totalDmg > monster.getComputedHP()) {
 				totalDmg -= monster.getComputedHP();
-				deadMonsters++;
+				deadMonsters.add(monster);
 			}else {
 				break;
 			}
@@ -160,8 +162,9 @@ public class BattleHelper {
 		hardestBlowHero.setDamage(hardestBlowHero.getDamage()/3);
 		
 		//We remove all the dead monsters from the main army list
-		army.setMonsters(army.getMonsters().subList(deadMonsters-1, army.getMonsters().size()-1));
-		report.setMonsterCasualties(deadMonsters);
+		army.getMonsters().removeAll(deadMonsters);
+//		army.setMonsters(army.getMonsters().subList(deadMonsters-1, army.getMonsters().size()-1));
+		report.setMonsterCasualties(deadMonsters.size());
 	}
 
 	private Integer criticalHit(Integer attackerNo) {

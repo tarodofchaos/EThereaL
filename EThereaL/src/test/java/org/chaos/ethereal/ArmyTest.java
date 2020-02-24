@@ -118,5 +118,11 @@ public class ArmyTest {
 		 Army army = armyHelper.createArmyFromFile("army_1582281452716");
 		 System.out.println(army.getHeroes());
 	 }
+	 
+	 @Test
+	 public void validateArmy() throws Exception {
+		 ArmyHelper armyHelper = new ArmyHelper(logger);
+		 armyHelper.validateArmy(armyHelper.createArmy(1000, 100));
+	 }
 	
 }

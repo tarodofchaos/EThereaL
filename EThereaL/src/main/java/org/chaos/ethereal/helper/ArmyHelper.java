@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,9 @@ import org.chaos.ethereal.persistence.Hero;
 import org.chaos.ethereal.persistence.Monster;
 import org.chaos.ethereal.persistence.SetOfValues;
 import org.chaos.ethereal.persistence.Specs;
+import org.chaos.ethereal.persistence.annotations.Validate;
+import org.chaos.ethereal.utils.AmazonUtils;
+import org.chaos.ethereal.utils.UtilHelper;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -85,6 +89,7 @@ public class ArmyHelper {
 		for (int i = 0; i < monstersSize; i++) {
 			currentMonster = dbMonsters.get(UtilHelper.getRandomNumberInRange(0, dbMonsters.size()-1));
 			currentMonster.setComputedHP(computeMonsterHP(currentMonster.getHitpoints()));
+			currentMonster.setArmyId(i);
 			armyMonsters.add(currentMonster);
 		}
 		army.setMonsters(armyMonsters);
@@ -98,30 +103,107 @@ public class ArmyHelper {
 		}
 	}
 	
-	public List<Hero> validateHero(Hero hero, List<Specs> specs, List<SetOfValues> setOfValues) throws Exception {
-		Map<String, Object> armyProps = beanProperties(hero);
-		List<Hero> invalidHeroes = new ArrayList<>();
-		
-		
-		
-		
-		return invalidHeroes;
+	public Boolean validateHeroMonster(Object armyHM, List<Specs> specs, List<SetOfValues> setOfValues) throws Exception {
+		Map<String, Object> heroProps = beanProperties(armyHM);
+		Specs spec;
+		Iterator<Specs> it = specs.iterator();
+		while (it.hasNext()) {
+			spec = it.next();
+			if (heroProps != null && !heroProps.isEmpty()) {
+				String fieldName = getField(armyHM.getClass(), spec.getFieldName());
+				if (heroProps.containsKey(fieldName)) {
+					Object field = heroProps.get(fieldName);
+					// Check if mandatory
+					if (field == null || field.toString().isEmpty()){
+						if (spec.getMandatory().equalsIgnoreCase(AppConstants.YES)){
+							return false;
+						}
+					} else {
+						// Check length
+						if (field.toString().length() > spec.getLength()) {
+							return false;
+						}
+						if (spec.getType().equals(AppConstants.TYPE_NUMBER)) {
+							// Check field type
+							if (!isNumber(field.toString())) {
+								return false;
+							}
+						}
+						if (spec.getType().equals(AppConstants.TYPE_DIE)) {
+							// Check field type
+							if (!isDie(field.toString())) {
+								return false;
+							}
+						}
+						// Possible values check
+						if (spec.getSetOfValues() != null && !spec.getSetOfValues().trim().isEmpty()) {
+							try {
+								SetOfValues set = setOfValues.stream().filter(
+										s -> s.getSet().equalsIgnoreCase(fieldName))
+										.findFirst()
+										.orElse(null);
+								if (!set.getValues().contains(field)) {
+									return false;
+								}
+							} catch (Exception e) {
+								return false;
+							}
+						}
+					}
+				}
+			}
+		}
+		return true;
 	}
 	
-	public List<Monster> validateMonster(Monster monster, List<Specs> specs, List<SetOfValues> setOfValues) throws Exception {
-		Map<String, Object> armyProps = beanProperties(monster);
-		List<Monster> invalidMonsters = new ArrayList<>();
-		
-		
-		
-		
-		return invalidMonsters;
-	}
-	
-	public void validateArmy(Army army) {
+	public void validateArmy(Army army) throws Exception {
 		List<Specs> specs = specsHelper.retrieveAllFileSpecs(logger);
 		List<SetOfValues> setOfValues = setOfValuesHelper.retrieveAllPossibleValues(logger);
+		List<Hero> rejectedHeroes = new ArrayList<>();
+		List<Monster> rejectedMonsters = new ArrayList<>();
 		
+		for (Hero hero : army.getHeroes()) {
+			if (!validateHeroMonster(hero, specs, setOfValues)) {
+				rejectedHeroes.add(hero);
+			}
+		}
+		army.getHeroes().removeAll(rejectedHeroes);
+		
+		for (Monster monster : army.getMonsters()) {
+			if (!validateHeroMonster(monster, specs, setOfValues)) {
+				rejectedMonsters.add(monster);
+			}
+		}
+		army.getMonsters().removeAll(rejectedMonsters);
+	}
+	
+	private boolean isNumber(String field){
+		try {
+			Integer.parseInt(field);
+		} catch (NumberFormatException e) {
+			return false;
+		}
+		return true;
+	}
+	
+	private boolean isDie(String field){
+		try {
+			String pattern = "(\\d+)?d(\\d+)([\\+\\-]\\d+)?";
+			return field.matches(pattern);
+		} catch (Exception e) {
+			return false;
+		}
+	}
+	
+	private String getField(Class<?> clazz, String fieldName) {
+
+		for (Field f : clazz.getDeclaredFields()) {
+			Validate annotation = f.getAnnotation(Validate.class);
+			if (annotation != null && annotation.dbname().equalsIgnoreCase(fieldName)) {
+				return f.getName().toLowerCase();
+			}
+		}
+		return null;
 	}
 	
 	public Army createArmyFromFile(String fileName) {
@@ -155,8 +237,10 @@ public class ArmyHelper {
     	Map<String, Object> result = new LinkedHashMap<>();
     	try {
             Class<?> clazz = bean.getClass();
-            for (final Field field : clazz.getFields()) {
+            for (final Field field : clazz.getDeclaredFields()) {
+            	field.setAccessible(true);
                 result.put(field.getName().toLowerCase(), field.get(bean));
+                field.setAccessible(false);
             }
         }
         catch (IllegalAccessException | IllegalArgumentException ex2) {

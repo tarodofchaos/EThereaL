@@ -1,6 +1,13 @@
 package org.chaos.ethereal.helper;
 
 public class AppConstants {
+	public static final String YES = "Y";
+	public static final String NO = "N";
+	
+	public static final String TYPE_NUMBER = "Number";
+	public static final String TYPE_DIE = "Die";
+	public static final String TYPE_STRING = "String";
+	
 	public static final String FIGHTER = "Fighter";
 	public static final String ROGUE = "Rogue";
 	public static final String MAGI = "Magi";
