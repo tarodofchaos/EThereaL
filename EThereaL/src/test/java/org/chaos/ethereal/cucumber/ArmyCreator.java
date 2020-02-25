@@ -1,5 +1,6 @@
 package org.chaos.ethereal.cucumber;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -71,7 +72,7 @@ public class ArmyCreator {
 	@Given("a valid Monster")
 	public void a_valid_Monster() {
 		validatedMonster = new Monster();
-		validatedMonster.setArmor("1d6");
+		validatedMonster.setArmor(15);
 		validatedMonster.setArmyId(1);
 		validatedMonster.setComputedHP(200);
 		validatedMonster.setHitpoints("4d4");
@@ -138,8 +139,8 @@ public class ArmyCreator {
 	
 	@Given("a hero has a {int} as dex")
 	public void a_hero_has_a_as_dex(Integer int1) {
-		validatedHero = new Hero();
 	    validatedHero.setDexterity(int1);
+	    validatedHM = validatedHero;
 	}
 	
 	@When("the army validator is invoked")
@@ -149,32 +150,37 @@ public class ArmyCreator {
 	
 	@Then("I should get a false value")
 	public void i_should_get_a_false_value() {
-	    assertTrue(!validationResult);
+	    assertFalse(validationResult);
 	}
 	
 	@Given("a hero has a {string} as race")
 	public void a_hero_has_a_as_race(String string) {
 		validatedHero.setRace(string);
+		validatedHM = validatedHero;
 	}
 	
 	@Given("a hero has a {string} as class")
 	public void a_hero_has_a_as_class(String string) {
 		validatedHero.setClazz(string);
+		validatedHM = validatedHero;
 	}
 	
 	@Given("a monster has a {string} as hitpoints")
 	public void a_monster_has_a_as_hitpoints(String string) {
 		validatedMonster.setHitpoints(string);
+		validatedHM = validatedMonster;
 	}
 	
 	@Given("a monster has a {string} as level")
 	public void a_monster_has_a_as_level(String string) {
 	   validatedMonster.setLevel(string);
+	   validatedHM = validatedMonster;
 	}
 	
 	@Given("a monster has a {string} as name")
 	public void a_monster_has_a_as_name(String string) {
 	   validatedMonster.setName(string);
+	   validatedHM = validatedMonster;
 	}
 	
 	@Then("I should get a true value")

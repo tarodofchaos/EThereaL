@@ -29,7 +29,7 @@ public class ArmyTest {
 	DynamoDBMapper mapper;
 	Faker faker;
 	Map<String, String> userCountry;
-	int monstersSize = 2000000;
+	int monstersSize = 1000;
 	int heroesSize = 130;
 	LambdaLogger logger = (new TestContext()).getLogger();
 	
@@ -70,7 +70,7 @@ public class ArmyTest {
 		heroes.add(hero);
 		
 		monster.setId(1);
-		monster.setArmor("12");
+		monster.setArmor(12);
 		monster.setHitpoints("122");
 		monster.setLevel("2");
 		monster.setMainAttack("1d8");
@@ -81,7 +81,7 @@ public class ArmyTest {
 		
 		monster = new Monster();
 		monster.setId(2);
-		monster.setArmor("8");
+		monster.setArmor(8);
 		monster.setHitpoints("12");
 		monster.setLevel("1");
 		monster.setMainAttack("1d4");

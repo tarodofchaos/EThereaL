@@ -104,15 +104,15 @@ public class ArmyHelper {
 	}
 	
 	public Boolean validateHeroMonster(Object armyHM, List<Specs> specs, List<SetOfValues> setOfValues) throws Exception {
-		Map<String, Object> heroProps = beanProperties(armyHM);
+		Map<String, Object> props = beanProperties(armyHM);
 		Specs spec;
 		Iterator<Specs> it = specs.iterator();
 		while (it.hasNext()) {
 			spec = it.next();
-			if (heroProps != null && !heroProps.isEmpty()) {
+			if (props != null && !props.isEmpty()) {
 				String fieldName = getField(armyHM.getClass(), spec.getFieldName());
-				if (heroProps.containsKey(fieldName)) {
-					Object field = heroProps.get(fieldName);
+				if (props.containsKey(fieldName) && armyHM.getClass().toGenericString().substring(armyHM.getClass().toGenericString().lastIndexOf(".")+1).equalsIgnoreCase(spec.getRecordType())) {
+					Object field = props.get(fieldName);
 					// Check if mandatory
 					if (field == null || field.toString().isEmpty()){
 						if (spec.getMandatory().equalsIgnoreCase(AppConstants.YES)){

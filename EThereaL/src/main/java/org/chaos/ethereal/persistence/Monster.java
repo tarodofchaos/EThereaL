@@ -18,7 +18,7 @@ public class Monster {
 	private String hitpoints;
 	private Integer computedHP;
 	@Validate(dbname="armor")
-	private String armor;
+	private Integer armor;
 	@Validate(dbname="main_attack")
 	private String mainAttack;
 	@Validate(dbname="special_attack")
@@ -65,10 +65,10 @@ public class Monster {
 	}
 	
 	@DynamoDBAttribute(attributeName="armor")
-	public String getArmor() {
+	public Integer getArmor() {
 		return armor;
 	}
-	public void setArmor(String armor) {
+	public void setArmor(Integer armor) {
 		this.armor = armor;
 	}
 	
@@ -88,12 +88,12 @@ public class Monster {
 		this.specialAttack = specialAttack;
 	}
 	
+	
 	public Integer getArmyId() {
 		return armyId;
 	}
 	public void setArmyId(Integer armyId) {
 		this.armyId = armyId;
 	}
-	
 	
 }

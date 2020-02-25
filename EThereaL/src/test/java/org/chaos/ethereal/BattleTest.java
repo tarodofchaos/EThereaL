@@ -76,7 +76,7 @@ public class BattleTest {
 		heroes.add(hero);
 		
 		monster.setId(1);
-		monster.setArmor("12");
+		monster.setArmor(12);
 		monster.setHitpoints("122");
 		monster.setLevel("2");
 		monster.setMainAttack("1d8");
@@ -87,7 +87,7 @@ public class BattleTest {
 		
 		monster = new Monster();
 		monster.setId(2);
-		monster.setArmor("8");
+		monster.setArmor(8);
 		monster.setHitpoints("12");
 		monster.setLevel("1");
 		monster.setMainAttack("1d4");

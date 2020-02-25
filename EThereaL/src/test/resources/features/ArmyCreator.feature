@@ -32,18 +32,18 @@ Feature: Army creation and validation
     Then I should get a <boolean> value
 
     Examples:
-    | army    |                                                            value                                       | attribute | boolean |
-    |    hero |                                                                                                    100 |       dex |   false |
-    |    hero |          "Several Species of Small Furry Animals Gathered Together in a Cave and Grooving with a Pict" |      race |   false |
-    |    hero |                                                                                             "Musician" |     class |   false |
-    | monster |                                                                                              "4ad5+12" | hitpoints |   false |
-    | monster |                                                                                                  "300" |     level |   false |
-    | monster | "The Attack Of The Wrath Of The War Of The Death Of The Strike Of The Sword Of The Blood Of The Beast" |      name |   false |
-    |    hero |                                                                                                     20 |       dex |    true |
-    |    hero |                                                                                                  "Elf" |      race |    true |
-    |    hero |                                                                                              "Fighter" |     class |    true |
-    | monster |                                                                                               "4d5+12" | hitpoints |    true |
-    | monster |                                                                                                   "10" |     level |    true |
-    | monster |                                                                                            "The Beast" |      name |    true |
+    | army    |                                                             value                                       | attribute | boolean |
+    |    hero |                                                                                                     100 |       dex |   false |
+    |    hero |           "Several Species of Small Furry Animals Gathered Together in a Cave and Grooving with a Pict" |      race |   false |
+    |    hero |                                                                                              "Musician" |     class |   false |
+    | monster |                                                                                               "4ad5+12" | hitpoints |   false |
+    | monster |                                                                                                   "300" |     level |   false |
+    | monster | "The Attack Of The Wrath Of The War Of The Death Of The Strike Of The Sword Of The Blood Of The Beast!" |      name |   false |
+    |    hero |                                                                                                      20 |       dex |    true |
+    |    hero |                                                                                                   "Elf" |      race |    true |
+    |    hero |                                                                                               "Fighter" |     class |    true |
+    | monster |                                                                                                "4d5+12" | hitpoints |    true |
+    | monster |                                                                                                    "10" |     level |    true |
+    | monster |                                                                                             "The Beast" |      name |    true |
      
      
