@@ -11,6 +11,8 @@ import org.chaos.ethereal.persistence.Army;
 import org.chaos.ethereal.persistence.BattleReport;
 import org.chaos.ethereal.persistence.Hero;
 import org.chaos.ethereal.persistence.Monster;
+import org.chaos.ethereal.utils.AppConstants;
+import org.chaos.ethereal.utils.UtilHelper;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 
@@ -25,7 +27,11 @@ public class BattleHelper {
 
 	public BattleReport resolveBattle(Army army, List<String> phases) {
 		report = new BattleReport();
-		
+		logger.log("Setting up battle");
+		report.setHardestBlowHeroNo(0);
+		report.setHardestBlowMonsterNo(0);
+		report.setMonsterCasualties(0);
+		report.setHeroCasualties(new ArrayList<>());
 		report.setBiggestHorde(getBiggestHorde(army));
 		report.setStartingHeroes(army.getHeroes().size());
 		report.setStartingMonsters(army.getMonsters().size());
@@ -34,11 +40,19 @@ public class BattleHelper {
 			switch (phase.toUpperCase()) {
 			//Attack
 			case "A":
-				resolveAttackPhase(army);
+				logger.log("Attack phase start");
+				if (!army.getHeroes().isEmpty()) {
+					resolveAttackPhase(army);
+				}
+				logger.log("Attack phase end");
 				break;
 			//Defend
 			case "D":
-				resolveDefendPhase(army);
+				logger.log("Defense phase start");
+				if (!army.getMonsters().isEmpty()) {
+					resolveDefendPhase(army);	
+				}
+				logger.log("Defense phase end");
 				break;
 			//Magic
 			case "M":
@@ -53,12 +67,13 @@ public class BattleHelper {
 				break;
 			}
 		}
+		logger.log("Determining battle winner");
 		determineWinner();
 		return report;
 	}
 	
 	private void determineWinner() {
-		if ((report.getStartingMonsters() == report.getMonsterCasualties()) || 
+		if ((report.getStartingMonsters().equals(report.getMonsterCasualties())) || 
 				((report.getStartingMonsters()-report.getMonsterCasualties())/20<(report.getStartingHeroes()-report.getHeroCasualties().size()))) {
 			report.setWinner(AppConstants.HEROES);
 		} else {
@@ -68,7 +83,7 @@ public class BattleHelper {
 	}
 
 	private String getBiggestHorde(Army army) {
-		//These two streams collect the most frequent mosnter and its number. Should more than one exist, an arbitrary string and number are returned.
+		//These two streams collect the most frequent monster and its number. Should more than one exist, an arbitrary string and number are returned.
 		//Disclaimer: use of Function.identity() collector was blatantly copied from StackOverflow since it was the best way to retrieve the key,value pair to use the mapping function
 		String biggestHorde = army.getMonsters().stream()
 		        .map(Monster::getName).filter(Objects::nonNull)
@@ -104,22 +119,28 @@ public class BattleHelper {
 		
 		//Stream+Lambda expression to add all the dice rolls at once
 		//I get them on a list to select a random critical hit before adding them up
+		logger.log("Rolling defense dice");
 		diceDmg.stream().forEach(m -> totalDmgList.add(UtilHelper.rollDie(m)));
 		
 		//Setting up the report for the final load phase
 		Integer critical = criticalHit(totalDmgList.size());
 		totalDmgList.set(critical, totalDmgList.get(critical)*20);
-		report.setHardestBlowMonsterNo(totalDmgList.get(critical));
-		StringBuilder sb = new StringBuilder();
-		Monster hardestBlowMonster = army.getMonsters().get(critical);
-		sb.append(hardestBlowMonster.getName());
-		report.setHardestBlowMonster(sb.toString());
-		sb.setLength(0);
+		
+		if (totalDmgList.get(critical)>report.getHardestBlowMonsterNo()) {
+			report.setHardestBlowMonsterNo(totalDmgList.get(critical));
+			StringBuilder sb = new StringBuilder();
+			Monster hardestBlowMonster = army.getMonsters().get(critical);
+			sb.append(hardestBlowMonster.getName());
+			report.setHardestBlowMonster(sb.toString());
+			sb.setLength(0);
+		}
 		
 		//Calculating all the damage
+		logger.log("Calculating defense damage");
 		Integer totalDmg = totalDmgList.stream().mapToInt(Integer::intValue).sum();
 		
 		//Using a traditional for loop to be able to break it as soon as no more damage to inflict is left
+		logger.log("Doing defense damage to heroes");
 		for (Hero hero : army.getHeroes()) {
 			if (totalDmg > hero.getHitpoints()) {
 				totalDmg -= hero.getHitpoints();
@@ -136,23 +157,32 @@ public class BattleHelper {
 		//Arbitrarily selecting a hero to perform a critical hit
 		Integer critical = criticalHit(army.getHeroes().size());
 		StringBuilder sb = new StringBuilder();
+		List<Monster> deadMonsters = new ArrayList<>();
 		Hero hardestBlowHero = army.getHeroes().get(critical);
 		hardestBlowHero.setDamage(hardestBlowHero.getDamage()*3);
 		
 		//Summing up all damage with a simple stream
+		logger.log("Calculating attack damage");
 		Integer totalDmg = army.getHeroes().stream().mapToInt(Hero::getDamage).sum();
 		
 		//Preparing report for load phase
-		report.setHardestBlowHeroNo(hardestBlowHero.getDamage());
-		sb.append(hardestBlowHero.getName()).append(" the ").append(hardestBlowHero.getRace()).append(" ").append(hardestBlowHero.getClazz());
-		report.setHardestBlowHero(sb.toString());
-		sb.setLength(0);
-		Integer deadMonsters = 0;
+		if (hardestBlowHero.getDamage()>report.getHardestBlowHeroNo()) {
+			report.setHardestBlowHeroNo(hardestBlowHero.getDamage());
+			sb.append(hardestBlowHero.getName()).append(" the ").append(hardestBlowHero.getRace()).append(" ").append(hardestBlowHero.getClazz());
+			report.setHardestBlowHero(sb.toString());
+			sb.setLength(0);
+		}
 		//Using a traditional for loop to be able to break it as soon as no more damage to inflict is left
+//		int monsterCounter = 0;
+//		for (int dmg = 0; dmg < totalDmg; monsterCounter++) {
+//			dmg += army.getMonsters().get(monsterCounter).getComputedHP();
+//			deadMonsters.add(army.getMonsters().get(monsterCounter));
+//		}
+		logger.log("Doing attack damage: "+totalDmg);
 		for (Monster monster : army.getMonsters()) {
 			if (totalDmg > monster.getComputedHP()) {
 				totalDmg -= monster.getComputedHP();
-				deadMonsters++;
+				deadMonsters.add(monster);
 			}else {
 				break;
 			}
@@ -160,8 +190,14 @@ public class BattleHelper {
 		hardestBlowHero.setDamage(hardestBlowHero.getDamage()/3);
 		
 		//We remove all the dead monsters from the main army list
-		army.setMonsters(army.getMonsters().subList(deadMonsters-1, army.getMonsters().size()-1));
-		report.setMonsterCasualties(deadMonsters);
+		army.getMonsters().removeAll(deadMonsters);
+//		army.getMonsters().stream().forEach(x -> System.out.println(x.getArmyId())); 
+//		Map<Integer, Monster> dmMap = army.getMonsters().stream().collect(Collectors.toMap(Monster::getArmyId, Function.identity()));
+//		deadMonsters.stream().forEach(m -> {
+//			dmMap.remove(m.getArmyId());
+//		});
+//		army.setMonsters(dmMap.values().stream().collect(Collectors.toList()));
+		report.setMonsterCasualties(report.getMonsterCasualties()+deadMonsters.size());
 	}
 
 	private Integer criticalHit(Integer attackerNo) {

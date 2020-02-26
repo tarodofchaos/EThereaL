@@ -1,20 +1,36 @@
 package org.chaos.ethereal.persistence;
 
+import java.io.Serializable;
+
+import org.chaos.ethereal.persistence.annotations.Validate;
+
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
 @DynamoDBTable(tableName="ethereal_monsters")
-public class Monster {
+public class Monster implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7292809083301272900L;
+	
 	private Integer id;
+	@Validate(dbname="name")
 	private String name;
+	@Validate(dbname="level")
 	private String level;
+	@Validate(dbname="hitpoints")
 	private String hitpoints;
 	private Integer computedHP;
-	private String armor;
+	@Validate(dbname="armor")
+	private Integer armor;
+	@Validate(dbname="main_attack")
 	private String mainAttack;
+	@Validate(dbname="special_attack")
 	private String specialAttack;
+	private Integer armyId;
 	
 	@DynamoDBHashKey(attributeName="id")
 	public Integer getId() {
@@ -56,10 +72,10 @@ public class Monster {
 	}
 	
 	@DynamoDBAttribute(attributeName="armor")
-	public String getArmor() {
+	public Integer getArmor() {
 		return armor;
 	}
-	public void setArmor(String armor) {
+	public void setArmor(Integer armor) {
 		this.armor = armor;
 	}
 	
@@ -79,5 +95,12 @@ public class Monster {
 		this.specialAttack = specialAttack;
 	}
 	
+	
+	public Integer getArmyId() {
+		return armyId;
+	}
+	public void setArmyId(Integer armyId) {
+		this.armyId = armyId;
+	}
 	
 }

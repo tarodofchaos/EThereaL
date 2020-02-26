@@ -1,6 +1,6 @@
-package org.chaos.ethereal.persistence;
+package org.chaos.ethereal.persistence.utils;
 
-import org.chaos.ethereal.helper.AppConstants;
+import org.chaos.ethereal.utils.AppConstants;
 
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
@@ -13,8 +13,15 @@ public class DynamoDBClientBuilder {
 	}
 
 	public static AmazonDynamoDB build(String node, String region) {
-		return (AmazonDynamoDB) ((AmazonDynamoDBClientBuilder) ((AmazonDynamoDBClientBuilder) AmazonDynamoDBClientBuilder
+		return (( AmazonDynamoDBClientBuilder
 				.standard().withCredentials(new DefaultAWSCredentialsProviderChain()))
 						.withEndpointConfiguration(new EndpointConfiguration(node, region))).build();
+	}
+
+	/**
+	 * For Sonar purposes
+	 */
+	private DynamoDBClientBuilder() {
+		super();
 	}
 }

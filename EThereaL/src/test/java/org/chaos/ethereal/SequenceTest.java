@@ -12,7 +12,7 @@ public class SequenceTest {
 	}
 
 	@Test
-	public void getSequence() {
+	public void getSequence() throws Exception {
 		Integer i = SequenceHelper.getNewSeq("ethereal_battle_report");
 		System.out.println(i);
 	}

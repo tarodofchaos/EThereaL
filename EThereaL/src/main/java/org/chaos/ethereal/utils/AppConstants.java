@@ -1,6 +1,19 @@
-package org.chaos.ethereal.helper;
+package org.chaos.ethereal.utils;
 
 public class AppConstants {
+	/**
+	 * For Sonar purposes. Code smells
+	 */
+	private AppConstants() {
+	}
+
+	public static final String YES = "Y";
+	public static final String NO = "N";
+	
+	public static final String TYPE_NUMBER = "Number";
+	public static final String TYPE_DIE = "Die";
+	public static final String TYPE_STRING = "String";
+	
 	public static final String FIGHTER = "Fighter";
 	public static final String ROGUE = "Rogue";
 	public static final String MAGI = "Magi";
@@ -16,6 +29,7 @@ public class AppConstants {
 	public static final String MAGIC = "Magic";
 
 	public static final String S3_ARMY_PATH = "private/army";
+	public static final String S3_ARCHIVE_PATH = "private/archive";
 	public static final String S3_BUCKET = "ethereal-app";
 
 	public static final String HEROES = "Heroes";

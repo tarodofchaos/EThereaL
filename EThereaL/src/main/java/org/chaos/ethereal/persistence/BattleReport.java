@@ -9,6 +9,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 @DynamoDBTable(tableName="ethereal_battle_report")
 public class BattleReport {
 
+	private static final String LINE_SEPARATOR = "line.separator";
 	private Integer id;
 	private List<Hero> heroCasualties;
 	private Integer monsterCasualties;
@@ -148,13 +149,13 @@ public class BattleReport {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Battle Status:").append(System.getProperty("line.separator")).append(System.getProperty("line.separator"))
-			.append(getStartingHeroes()).append(" heroes vs ").append(getStartingMonsters()).append(" monsters").append(System.getProperty("line.separator"))
-			.append("Winner: ").append(getWinner()).append(System.getProperty("line.separator"))
-			.append("Hero casualties: ").append(getHeroCasualties().size()).append(System.getProperty("line.separator"))
-			.append("Monster casualties: ").append(getMonsterCasualties()).append(System.getProperty("line.separator"))
-			.append("Hardest hero hit: ").append(getHardestBlowHero()).append(" with ").append(getHardestBlowHeroNo()).append(" damage").append(System.getProperty("line.separator"))
-			.append("Hardest monster hit: ").append(getHardestBlowMonster()).append(" with ").append(getHardestBlowMonsterNo()).append(" damage").append(System.getProperty("line.separator"))
+		sb.append("Battle Status:").append(System.getProperty(LINE_SEPARATOR)).append(System.getProperty(LINE_SEPARATOR))
+			.append(getStartingHeroes()).append(" heroes vs ").append(getStartingMonsters()).append(" monsters").append(System.getProperty(LINE_SEPARATOR))
+			.append("Winner: ").append(getWinner()).append(System.getProperty(LINE_SEPARATOR))
+			.append("Hero casualties: ").append(getHeroCasualties().size()).append(System.getProperty(LINE_SEPARATOR))
+			.append("Monster casualties: ").append(getMonsterCasualties()).append(System.getProperty(LINE_SEPARATOR))
+			.append("Hardest hero hit: ").append(getHardestBlowHero()).append(" with ").append(getHardestBlowHeroNo()).append(" damage").append(System.getProperty(LINE_SEPARATOR))
+			.append("Hardest monster hit: ").append(getHardestBlowMonster()).append(" with ").append(getHardestBlowMonsterNo()).append(" damage").append(System.getProperty(LINE_SEPARATOR))
 			.append("Biggest monster horde: ").append(getBiggestHorde());
 		
 		return sb.toString();

@@ -2,7 +2,8 @@ package org.chaos.ethereal.helper;
 
 import java.math.BigDecimal;
 
-import org.chaos.ethereal.persistence.DynamoDBClientBuilder;
+import org.chaos.ethereal.persistence.utils.DynamoDBClientBuilder;
+import org.chaos.ethereal.utils.AppConstants;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
@@ -13,24 +14,23 @@ import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 
 public class SequenceHelper {
+	/**
+	 * For Sonar purposes. Code smells
+	 */
+	private SequenceHelper() {
+	}
+
 	static AmazonDynamoDB client = DynamoDBClientBuilder.build();
 
-	public static Integer getNewSeq(String tableName) {
+	public static Integer getNewSeq(String tableName) throws Exception {
 		DynamoDB dynamoDB = new DynamoDB(client);
 		Table table = dynamoDB.getTable(AppConstants.TABLE_ETHEREAL_ID_GENERATOR);
 		UpdateItemSpec updateItemSpec = (new UpdateItemSpec()).withPrimaryKey("table_name", tableName)
 				.withUpdateExpression("set id = id + :val").withValueMap((new ValueMap()).withNumber(":val", 1))
 				.withReturnValues(ReturnValue.UPDATED_OLD);
 
-		try {
-			UpdateItemOutcome outcome = table.updateItem(updateItemSpec);
-			Integer newSeq = ((BigDecimal)outcome.getItem().get("id")).intValue();
+		UpdateItemOutcome outcome = table.updateItem(updateItemSpec);
 
-			return newSeq;
-		} catch (Exception e) {
-			//TODO EXCEPTIONS!!!
-			e.printStackTrace();
-			return null;
-		}
+		return ((BigDecimal)outcome.getItem().get("id")).intValue();
 	}
 }

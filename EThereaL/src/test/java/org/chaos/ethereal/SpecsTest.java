@@ -15,11 +15,11 @@ public class SpecsTest {
 	}
 
 	@Test
-	public void getSequence() {
+	public void getSequence() throws Exception {
 		SpecsHelper helper = new SpecsHelper();
 		TestContext ctx = new TestContext();
 		List<Specs> specs = helper.retrieveAllFileSpecs(ctx.getLogger());
-		System.out.println("");
+		System.out.println(specs);
 	}
 	
 }

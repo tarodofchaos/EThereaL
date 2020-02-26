@@ -17,7 +17,6 @@ import org.chaos.ethereal.persistence.Monster;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
@@ -36,7 +35,7 @@ public class MetaETLTest {
 	
 	@Before
 	public void setUp() {
-		client = AmazonDynamoDBClientBuilder.standard().withRegion("eu-west-1").withCredentials(new EnvironmentVariableCredentialsProvider()).build();
+		client = AmazonDynamoDBClientBuilder.standard().withRegion("eu-west-1").build();
 		mapper = new DynamoDBMapper(client);
 		faker = new Faker();
 		
@@ -127,7 +126,7 @@ public class MetaETLTest {
 		heroes.add(hero);
 		
 		monster.setId(1);
-		monster.setArmor("12");
+		monster.setArmor(12);
 		monster.setHitpoints("122");
 		monster.setLevel("2");
 		monster.setMainAttack("1d8");
@@ -138,7 +137,7 @@ public class MetaETLTest {
 		
 		monster = new Monster();
 		monster.setId(2);
-		monster.setArmor("8");
+		monster.setArmor(8);
 		monster.setHitpoints("12");
 		monster.setLevel("1");
 		monster.setMainAttack("1d4");
@@ -181,9 +180,23 @@ public class MetaETLTest {
 		fos.write(json.getBytes());
 		fos.flush();
 		fos.close();
+	}
+	
+	@Test
+	public void fixDataType() {
+		List<Monster> dbMonsters = new ArrayList<>();
+		List<Monster> fixedMonsters = new ArrayList<>();
 		
-		Army object = gson.fromJson(new FileReader(fileName), Army.class);
-		System.out.println("");
+		DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
+		
+		dbMonsters = mapper.scan(Monster.class, scanExpression);
+		for (Monster monster : dbMonsters) {
+//			monster.setArmor(monster.getArmor1());
+//			monster.setArmor1(null);
+			fixedMonsters.add(monster);
+		}
+		mapper.batchSave(fixedMonsters);
+		
 	}
 	
 	private Hero transformLineToHero(String line) {
@@ -206,7 +219,7 @@ public class MetaETLTest {
 		monster.setName(monsterLine[0]);
 		monster.setLevel(getLevel(monsterLine[1].substring(0, monsterLine[1].indexOf("d"))));
 		monster.setHitpoints(monsterLine[1]);
-		monster.setArmor(monsterLine[2].substring(3));
+		monster.setArmor(Integer.parseInt(monsterLine[2].substring(3)));
 		monster.setMainAttack(monsterLine[3].substring(monsterLine[3].indexOf("(")+1, monsterLine[3].indexOf(")")));
 		if (monsterLine[3].indexOf("(",monsterLine[3].indexOf(")")) > -1 ){
 			monster.setSpecialAttack(monsterLine[3].substring(monsterLine[3].lastIndexOf("(")+1, monsterLine[3].lastIndexOf(")")));
@@ -217,89 +230,11 @@ public class MetaETLTest {
 	private String getLevel(String index) {
 		return String.valueOf(getRandomNumberInRange(Integer.parseInt(index), Integer.parseInt(index)+1));
 	}
-
-	@Test
-	public void generateSampleFileFromDynamoDB() {
-//		List<BandPerGenre> bandList;
-//		try {
-//			DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
-//			
-//			bandList = mapper.scan(BandPerGenre.class, scanExpression);
-//			String band;
-//			String country;
-//			String username;
-//			StringBuilder sb = new StringBuilder();
-//			
-//			FileWriter writer = new FileWriter("D:\\16. Dev\\Zartis\\spikyfy\\output\\load.in", true);
-//			
-//			for (int i = 0; i < 2000000; i++) {
-//				if (i % 10000 == 0) {
-//					System.out.println(new Date().toString()+" "+i+" records created");
-//				}
-//				band = bandList.get(getRandomNumberInRange(0, 2299)).getBandName();
-//				username = getRandomUsername(getRandomNumberInRange(1, 10));
-//				country = userCountry.get(username);
-//				sb.append(username).append(AppConstants.SEPARATOR).append(band).append(AppConstants.SEPARATOR).append(country).append("\r\n");
-//			}
-//			writer.write(sb.toString());
-//			writer.close();
-//		
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-		
-	}
 	
 	private int getRandomNumberInRange(int min, int max) {
 
 		Random r = new Random();
 		return r.nextInt((max - min) + 1) + min;
-	}
-	
-	private String getRandomUsername(int type) {
-		String username = "";
-		switch (type) {
-		case 1:
-			username = faker.ancient().god();
-			break;
-		case 2:
-			username = faker.artist().name();
-			break;
-		case 3:
-			username = faker.backToTheFuture().character();
-			break;
-		case 4:
-			username = faker.dragonBall().character();
-			break;
-		case 5:
-			username = faker.dune().character();
-			break;
-		case 6:
-			username = faker.elderScrolls().dragon();
-			break;
-		case 7:
-			username = faker.hipster().word();
-			break;
-		case 8:
-			username = faker.pokemon().name();
-			break;
-		case 9:
-			username = faker.lordOfTheRings().character();
-			break;
-		case 10:
-			username = faker.witcher().monster();
-			break;
-			
-		default:
-			break;
-		}
-		
-		username = username.replace(" ", "").toLowerCase();
-		
-		if (!userCountry.containsKey(username)) {
-			userCountry.put(username, countries[getRandomNumberInRange(0, 99)]);
-		}		
-		return username;
 	}
 	
 }
