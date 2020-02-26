@@ -113,7 +113,7 @@ public class ArmyTest {
 	}
 	
 	 @Test
-	 public void createArmyFromFile() {
+	 public void createArmyFromFile() throws Exception {
 		 ArmyHelper armyHelper = new ArmyHelper(logger);
 		 Army army = armyHelper.createArmyFromFile("army_1582281452716");
 		 System.out.println(army.getHeroes());

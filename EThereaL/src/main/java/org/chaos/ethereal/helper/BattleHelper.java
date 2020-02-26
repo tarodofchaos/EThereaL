@@ -11,6 +11,7 @@ import org.chaos.ethereal.persistence.Army;
 import org.chaos.ethereal.persistence.BattleReport;
 import org.chaos.ethereal.persistence.Hero;
 import org.chaos.ethereal.persistence.Monster;
+import org.chaos.ethereal.utils.AppConstants;
 import org.chaos.ethereal.utils.UtilHelper;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
@@ -59,7 +60,7 @@ public class BattleHelper {
 	}
 	
 	private void determineWinner() {
-		if ((report.getStartingMonsters() == report.getMonsterCasualties()) || 
+		if ((report.getStartingMonsters().equals(report.getMonsterCasualties())) || 
 				((report.getStartingMonsters()-report.getMonsterCasualties())/20<(report.getStartingHeroes()-report.getHeroCasualties().size()))) {
 			report.setWinner(AppConstants.HEROES);
 		} else {

@@ -8,18 +8,19 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.chaos.ethereal.helper.AppConstants;
 import org.chaos.ethereal.helper.ArmyHelper;
 import org.chaos.ethereal.helper.BattleHelper;
 import org.chaos.ethereal.helper.SequenceHelper;
 import org.chaos.ethereal.persistence.Army;
 import org.chaos.ethereal.persistence.BattleReport;
 import org.chaos.ethereal.utils.AmazonUtils;
+import org.chaos.ethereal.utils.AppConstants;
 import org.chaos.ethereal.utils.UtilHelper;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
 import com.amazonaws.regions.Regions;
@@ -30,10 +31,10 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 public class EThereaLRestHandler implements RequestStreamHandler {
 
-	JSONParser parser = new JSONParser();
 	ArmyHelper armyHelper;
 	BattleHelper battleHelper;
 	AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withCredentials(new SystemPropertiesCredentialsProvider()).withRegion(Regions.EU_WEST_1).build();
@@ -50,7 +51,7 @@ public class EThereaLRestHandler implements RequestStreamHandler {
     	initHandler(context);
     	ObjectMapper mapper = new ObjectMapper();
 		mapper.setSerializationInclusion(Include.NON_NULL);
-		JSONObject event;
+		Gson gson = new Gson();
 		BattleReport report = new BattleReport();
 		//Workaround to changed Amazon protected environment variables for authentication
         //This is just a convenient way of building AWS SDK clients
@@ -58,7 +59,7 @@ public class EThereaLRestHandler implements RequestStreamHandler {
         System.setProperty("aws.secretKey", System.getenv("aws_secretKey"));
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-			event = (JSONObject) this.parser.parse(reader);
+			Map<?, ?> event = gson.fromJson(reader, Map.class);
 			JSONObject pps = (JSONObject) event.get("pathParameters");
 			
 			if (pps != null) {
@@ -87,11 +88,11 @@ public class EThereaLRestHandler implements RequestStreamHandler {
 	          //Since it is also a REST call, an status code and a message are returned to the caller
 				OutputMessageDTO output = new OutputMessageDTO();
 				output.setSuccessful(true);
-				event = new JSONObject();
-				event.put("statusCode", "200");
-				event.put("body", mapper.writeValueAsString(output));
+				Map<String, Object> outMap = new HashMap<>();
+				outMap.put("statusCode", "200");
+				outMap.put("body", mapper.writeValueAsString(output));
 				OutputStreamWriter writer = new OutputStreamWriter(outputStream, "UTF-8");
-				writer.write(event.toJSONString());
+				writer.write(gson.toJson(outMap));
 				writer.close();
 			}else {
 				throw new Exception("All parameters must be sent");
@@ -100,15 +101,14 @@ public class EThereaLRestHandler implements RequestStreamHandler {
 		} catch (Exception e) {
 			//Exceptions are converted and sent via email to SNS subscribers
 			//Since it is also a REST call, an status code and a message are returned to the caller
-			e.printStackTrace();
 			AmazonUtils.sendMessageToSnsTopic(AppConstants.SNS_ERROR_ARN_TOPIC, e.getMessage(), null, "Error in battle");
 			OutputMessageDTO output = new OutputMessageDTO();
 			output.setSuccessful(false);
-			event = new JSONObject();
-			event.put("statusCode", "500");
-			event.put("body", mapper.writeValueAsString(output));
+			Map<String, Object> outMap = new HashMap<>();
+			outMap.put("statusCode", "500");
+			outMap.put("body", mapper.writeValueAsString(output));
 			OutputStreamWriter writer = new OutputStreamWriter(outputStream, "UTF-8");
-			writer.write(event.toJSONString());
+			writer.write(gson.toJson(outMap));
 			writer.close();
 		}
     }

@@ -18,6 +18,7 @@ import org.chaos.ethereal.persistence.SetOfValues;
 import org.chaos.ethereal.persistence.Specs;
 import org.chaos.ethereal.persistence.annotations.Validate;
 import org.chaos.ethereal.utils.AmazonUtils;
+import org.chaos.ethereal.utils.AppConstants;
 import org.chaos.ethereal.utils.UtilHelper;
 
 import com.amazonaws.regions.Regions;
@@ -111,7 +112,7 @@ public class ArmyHelper {
 			spec = it.next();
 			if (props != null && !props.isEmpty()) {
 				String fieldName = getField(armyHM.getClass(), spec.getFieldName());
-				if (props.containsKey(fieldName) && armyHM.getClass().toGenericString().substring(armyHM.getClass().toGenericString().lastIndexOf(".")+1).equalsIgnoreCase(spec.getRecordType())) {
+				if (props.containsKey(fieldName) && armyHM.getClass().toGenericString().substring(armyHM.getClass().toGenericString().lastIndexOf('.')+1).equalsIgnoreCase(spec.getRecordType())) {
 					Object field = props.get(fieldName);
 					// Check if mandatory
 					if (field == null || field.toString().isEmpty()){
@@ -123,18 +124,15 @@ public class ArmyHelper {
 						if (field.toString().length() > spec.getLength()) {
 							return false;
 						}
-						if (spec.getType().equals(AppConstants.TYPE_NUMBER)) {
-							// Check field type
-							if (!isNumber(field.toString())) {
-								return false;
-							}
+						// Check field type
+						if (spec.getType().equals(AppConstants.TYPE_NUMBER) && !isNumber(field.toString())) {
+							
+							return false;
 						}
-						if (spec.getType().equals(AppConstants.TYPE_DIE)) {
-							// Check field type
-							if (!isDie(field.toString())) {
-								return false;
-							}
+						if (spec.getType().equals(AppConstants.TYPE_DIE) && !isDie(field.toString())) {
+							return false;
 						}
+						
 						// Possible values check
 						if (spec.getSetOfValues() != null && !spec.getSetOfValues().trim().isEmpty()) {
 							try {
@@ -195,7 +193,7 @@ public class ArmyHelper {
 		}
 	}
 	
-	private String getField(Class<?> clazz, String fieldName) {
+	private String getField(Class<?> clazz, String fieldName) throws Exception {
 
 		for (Field f : clazz.getDeclaredFields()) {
 			Validate annotation = f.getAnnotation(Validate.class);
@@ -206,7 +204,7 @@ public class ArmyHelper {
 		return null;
 	}
 	
-	public Army createArmyFromFile(String fileName) {
+	public Army createArmyFromFile(String fileName) throws Exception {
 		Army army;
 		Gson gson = new Gson();
 		InputStream is = AmazonUtils.downloadObject(AppConstants.S3_BUCKET, AppConstants.S3_ARMY_PATH, fileName);
@@ -216,7 +214,7 @@ public class ArmyHelper {
 		return army;
 	}
 	
-	public Army createArmyFromIS(InputStream is) {
+	public Army createArmyFromIS(InputStream is) throws Exception{
 		Army army;
 		Gson gson = new Gson();
 		Reader reader = new InputStreamReader(is);
@@ -230,22 +228,16 @@ public class ArmyHelper {
 	}
 	
 	private Integer computeHeroStats(Integer stat) {
-		return Math.toIntExact(Math.round(stat*(monsterArmySize/heroArmySize)*0.2));
+		return Math.toIntExact(Math.round(stat*((double)monsterArmySize/heroArmySize)*0.2));
 	}
 	
     public static Map<String, Object> beanProperties(Object bean) throws Exception {
     	Map<String, Object> result = new LinkedHashMap<>();
-    	try {
-            Class<?> clazz = bean.getClass();
-            for (final Field field : clazz.getDeclaredFields()) {
-            	field.setAccessible(true);
-                result.put(field.getName().toLowerCase(), field.get(bean));
-                field.setAccessible(false);
-            }
-        }
-        catch (IllegalAccessException | IllegalArgumentException ex2) {
-        }
-        catch (Exception e) {
+        Class<?> clazz = bean.getClass();
+        for (final Field field : clazz.getDeclaredFields()) {
+        	field.setAccessible(true);
+            result.put(field.getName().toLowerCase(), field.get(bean));
+            field.setAccessible(false);
         }
         return result;
     }

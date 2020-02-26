@@ -1,7 +1,7 @@
 package org.chaos.ethereal.persistence;
 
-import org.chaos.ethereal.helper.AppConstants;
 import org.chaos.ethereal.persistence.annotations.Validate;
+import org.chaos.ethereal.utils.AppConstants;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
@@ -28,8 +28,6 @@ public class Hero {
 	private Integer hitpoints;
 	private Integer damage;
 	private Integer mana;
-	private String mainStat;
-	private String secondaryStat;
 	
 	@DynamoDBHashKey(attributeName="id")
 	public Integer getId() {
@@ -132,5 +130,4 @@ public class Hero {
 			return getMagic();
 		}
 	}
-	
 }

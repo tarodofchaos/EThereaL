@@ -29,7 +29,7 @@ public class ArmyCreator {
 			return helper.createArmy(monstersSize, heroesSize);
 		}
 		
-		static Boolean validateArmy(Object hm){
+		static Boolean validateArmy(Object hm) throws Exception{
 			SpecsHelper specsHelper = new SpecsHelper();
 			SetOfValuesHelper setOfValuesHelper = new SetOfValuesHelper();
 			List<Specs> specs = specsHelper.retrieveAllFileSpecs(new TestContext().getLogger());
@@ -144,7 +144,7 @@ public class ArmyCreator {
 	}
 	
 	@When("the army validator is invoked")
-	public void the_army_validator_is_invoked() {
+	public void the_army_validator_is_invoked() throws Exception {
 		validationResult = ArmyCreatorTest.validateArmy(validatedHM);
 	}
 	

@@ -1,18 +1,20 @@
 package org.chaos.ethereal;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import org.chaos.ethereal.helper.AppConstants;
 import org.chaos.ethereal.helper.ArmyHelper;
 import org.chaos.ethereal.helper.BattleHelper;
 import org.chaos.ethereal.helper.SequenceHelper;
 import org.chaos.ethereal.persistence.Army;
 import org.chaos.ethereal.persistence.BattleReport;
 import org.chaos.ethereal.utils.AmazonUtils;
+import org.chaos.ethereal.utils.AppConstants;
 import org.chaos.ethereal.utils.UtilHelper;
 
 import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
@@ -27,6 +29,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
 import com.amazonaws.util.Base64;
+import com.google.gson.Gson;
 
 public class EThereaLHordeHandler implements RequestHandler<S3Event, String> {
 
@@ -66,6 +69,7 @@ public class EThereaLHordeHandler implements RequestHandler<S3Event, String> {
     public String handleRequest(S3Event event, Context context) {
     	Date d1 = new Date();
     	initHandler(context);
+    	Gson gson = new Gson();
     	context.getLogger().log("Received event: " + event);
         List<String> phases;
         //Workaround to changed Amazon protected environment variables for authentication
@@ -86,21 +90,38 @@ public class EThereaLHordeHandler implements RequestHandler<S3Event, String> {
             armyHelper.validateArmy(army);
             
             //A conveniently formatted filename gives us the battle phases. This is the start of the Transform phase
-            phases = Arrays.asList(key.split("_")[1].split(""));
+            String[] keyName = key.split("_");
+            phases = Arrays.asList(keyName[1].split(""));
             report = battleHelper.resolveBattle(army, phases);
             
-            //After all the transformations, a report is generated and save. This is the Load phase
+            //After all the transformations, a report is generated and saved. We also archive the file. This is the Load phase
             report.setId(SequenceHelper.getNewSeq(AmazonUtils.getTableName(report.getClass())));
+            
+            army.setId(SequenceHelper.getNewSeq(AmazonUtils.getTableName(army.getClass())));
+            army.setBattleId(report.getId());
+            //Saving the resulting armies in both S3 and DB
+            String originalArmyName = key.substring(key.lastIndexOf('/')+1);
+            String resultingArmyName = key.substring(key.lastIndexOf('/')+1)+"_resulting";
+            army.setOriginalArmyName(originalArmyName);
+            army.setResultingArmyName(resultingArmyName);
+            mapper.save(army);
+            
+            byte[] bytes = gson.toJson(army).getBytes();
+            Integer size = bytes.length;
+            InputStream is = new ByteArrayInputStream(bytes);
+            
+            //We archive the processed files for future reference
+            AmazonUtils.uploadMultipartObject(bucket, AppConstants.S3_ARCHIVE_PATH, resultingArmyName, is, size);
+            AmazonUtils.moveObject(bucket, AppConstants.S3_ARMY_PATH, AppConstants.S3_ARCHIVE_PATH, originalArmyName, originalArmyName+"_original");
+            
             String miliseconds = UtilHelper.getSecondsAndMillisecondsDelta(d1, new Date());	
             report.setBattleTime(miliseconds);
             mapper.save(report);
-            
             //To finish, an email is sent to all the subscribers of the SNS topic
             AmazonUtils.sendMessageToSnsTopic(AppConstants.SNS_SUCCESS_ARN_TOPIC, report.toString(), null, "Battle success");
             return "OK";
         } catch (Exception e) {
         	//Exceptions are converted and sent via email to SNS subscribers
-        	 e.printStackTrace();
              context.getLogger().log(e.getMessage());
              AmazonUtils.sendMessageToSnsTopic(AppConstants.SNS_ERROR_ARN_TOPIC, String.format(
                      e.getMessage(), key, bucket), null, "Error in battle");

@@ -15,11 +15,11 @@ public class SetOfValuesTest {
 	}
 
 	@Test
-	public void getSequence() {
+	public void getSequence() throws Exception {
 		SetOfValuesHelper helper = new SetOfValuesHelper();
 		TestContext ctx = new TestContext();
 		List<SetOfValues> result = helper.retrieveAllPossibleValues(ctx.getLogger());
-		System.out.println("");
+		System.out.println(result);
 	}
 	
 }

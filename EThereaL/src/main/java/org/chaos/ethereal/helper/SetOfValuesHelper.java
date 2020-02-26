@@ -14,21 +14,14 @@ import com.amazonaws.services.lambda.runtime.LambdaLogger;
 public class SetOfValuesHelper {
 	private AmazonDynamoDB client = DynamoDBClientBuilder.build();
 
-	public List<SetOfValues> retrieveAllPossibleValues(LambdaLogger logger) {
-		Object result = new ArrayList();
-		List<SetOfValues> set = new ArrayList<>();
+	public List<SetOfValues> retrieveAllPossibleValues(LambdaLogger logger) throws Exception{
+		List<SetOfValues> set;
+		List<SetOfValues> result = new ArrayList<>();
+		logger.log("Attempting to read the item...");
+		DynamoDBMapper mapper = new DynamoDBMapper(this.client);
+		set = mapper.scan(SetOfValues.class, new DynamoDBScanExpression());
+		set.stream().forEach(s -> result.add((SetOfValues)s));
 
-		try {
-			logger.log("Attempting to read the item...");
-			DynamoDBMapper mapper = new DynamoDBMapper(this.client);
-			result = mapper.scan(SetOfValues.class, new DynamoDBScanExpression());
-			((List)result).stream().forEach(s -> {
-				set.add((SetOfValues)s);
-			});
-		} catch (Exception e) {
-			//TODO EXCEPTIONS!!!!
-		}
-
-		return set;
+		return result;
 	}
 }
