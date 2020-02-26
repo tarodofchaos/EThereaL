@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.chaos.ethereal.helper.ArmyHelper;
 import org.chaos.ethereal.helper.BattleHelper;
@@ -33,8 +32,8 @@ public class BattleTest {
 	DynamoDBMapper mapper;
 	Faker faker;
 	Map<String, String> userCountry;
-	int monstersSize = 1000;
-	int heroesSize = 10;
+	int monstersSize = 2000000;
+	int heroesSize = 130;
 	LambdaLogger logger = (new TestContext()).getLogger();
 	
 	@Before
@@ -122,12 +121,14 @@ public class BattleTest {
 	public void randomBattle() throws Exception {
 		ArmyHelper armyHelper = new ArmyHelper(logger);
 		BattleHelper battleHelper = new BattleHelper(logger);
-		Army army = armyHelper.createArmy(getRandomNumberInRange(40000, 50000), heroesSize);
+		Army army = armyHelper.createArmy(monstersSize, heroesSize);
 		List<String> phases = new ArrayList<>();
-		phases.add("Attack");
-//		phases.add("Attack");
-//		phases.add("Attack");
-		phases.add("Defend");
+		phases.add("a");
+		phases.add("a");
+		phases.add("a");
+		phases.add("d");
+		phases.add("d");
+		phases.add("a");
 		battleHelper.resolveBattle(army, phases);
 		
 	}
@@ -141,10 +142,5 @@ public class BattleTest {
 			Integer result = UtilHelper.rollDie(diceNumber+"d"+dieSize+"+"+modifier);
 			Assert.assertTrue(result >= Integer.parseInt(diceNumber)+Integer.parseInt(modifier) && result <= (Integer.parseInt(diceNumber)*Integer.parseInt(dieSize))+Integer.parseInt(modifier));	
 		}
-	}
-	
-	private int getRandomNumberInRange(int min, int max) {
-		Random r = new Random();
-		return r.nextInt((max - min) + 1) + min;
 	}
 }

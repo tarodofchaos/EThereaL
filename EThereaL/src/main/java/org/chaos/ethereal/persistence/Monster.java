@@ -1,5 +1,7 @@
 package org.chaos.ethereal.persistence;
 
+import java.io.Serializable;
+
 import org.chaos.ethereal.persistence.annotations.Validate;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
@@ -7,8 +9,13 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
 @DynamoDBTable(tableName="ethereal_monsters")
-public class Monster {
+public class Monster implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7292809083301272900L;
+	
 	private Integer id;
 	@Validate(dbname="name")
 	private String name;

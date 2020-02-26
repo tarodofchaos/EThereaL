@@ -61,5 +61,6 @@ public class UtilHelper {
 	
 	public static long getMillisecondsDelta(Date d1, Date d2) {
 		return d2.getTime() - d1.getTime();
-	}	
+	}
+	
 }

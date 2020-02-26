@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.chaos.ethereal.persistence.Army;
 import org.chaos.ethereal.persistence.Hero;
 import org.chaos.ethereal.persistence.Monster;
@@ -62,6 +63,7 @@ public class ArmyHelper {
 		DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
 		
 		//Getting heroes and monsters from DB. Should be grabbed from the Handler to make this Helper environment agnostic
+		logger.log("Getting DB heroes and monsters");
 		dbHeroes = mapper.scan(Hero.class, scanExpression);
 		dbMonsters = mapper.scan(Monster.class, scanExpression);
 		heroArmySize = heroesSize;
@@ -73,27 +75,32 @@ public class ArmyHelper {
 		}
 		
 		//We select random heroes from all the available
+		logger.log("Generating random hero army");
 		rngHeroes = UtilHelper.getUniqueRandomNumberInRange(dbHeroes.size()-1, heroesSize);
 		for (Integer hero : rngHeroes) {
 			armyHeroes.add(dbHeroes.get(hero));
 		}
 		
 		//This stream+lambda expression is used to compute the values since they can be calculated in many forms and thus, should not be stored in DB, but computed each time
+		logger.log("Computing heroes stats");
 		armyHeroes.stream().forEach(h->{
 			h.setDamage(computeHeroStats(h.getMainStat()+h.getSecondaryStat()));
 			h.setMana(computeHeroStats(h.getMagic()*2));
-			h.setHitpoints(computeHeroStats(h.getMainStat()*20));
+			h.setHitpoints(computeHeroStats(h.getMainStat()*30));
 		});
 		army.setHeroes(armyHeroes);
 		
 		//For the sake of readability, sometimes a traditional for loop is better to be used
+		logger.log("Generating random monster army");
 		for (int i = 0; i < monstersSize; i++) {
-			currentMonster = dbMonsters.get(UtilHelper.getRandomNumberInRange(0, dbMonsters.size()-1));
+			currentMonster = new Monster();
+			currentMonster = SerializationUtils.clone(dbMonsters.get(UtilHelper.getRandomNumberInRange(0, dbMonsters.size()-1)));
 			currentMonster.setComputedHP(computeMonsterHP(currentMonster.getHitpoints()));
 			currentMonster.setArmyId(i);
 			armyMonsters.add(currentMonster);
 		}
 		army.setMonsters(armyMonsters);
+		logger.log("Finished random army generation");
 		
 		return army;
 	}
@@ -160,19 +167,23 @@ public class ArmyHelper {
 		List<Hero> rejectedHeroes = new ArrayList<>();
 		List<Monster> rejectedMonsters = new ArrayList<>();
 		
+		logger.log("Hero validation start");
 		for (Hero hero : army.getHeroes()) {
 			if (!validateHeroMonster(hero, specs, setOfValues)) {
 				rejectedHeroes.add(hero);
 			}
 		}
 		army.getHeroes().removeAll(rejectedHeroes);
+		logger.log("Hero validation finished");
 		
+		logger.log("Monster validation start");
 		for (Monster monster : army.getMonsters()) {
 			if (!validateHeroMonster(monster, specs, setOfValues)) {
 				rejectedMonsters.add(monster);
 			}
 		}
 		army.getMonsters().removeAll(rejectedMonsters);
+		logger.log("Monster validation finished");
 	}
 	
 	private boolean isNumber(String field){
@@ -228,7 +239,7 @@ public class ArmyHelper {
 	}
 	
 	private Integer computeHeroStats(Integer stat) {
-		return Math.toIntExact(Math.round(stat*((double)monsterArmySize/heroArmySize)*0.2));
+		return Math.toIntExact(Math.round(stat*(monsterArmySize/heroArmySize)*0.05));
 	}
 	
     public static Map<String, Object> beanProperties(Object bean) throws Exception {
