@@ -8,6 +8,10 @@ import java.util.List;
 import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
+import com.amazonaws.services.lambda.AWSLambda;
+import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
+import com.amazonaws.services.lambda.model.GetFunctionRequest;
+import com.amazonaws.services.lambda.model.GetFunctionResult;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.AbortMultipartUploadRequest;
@@ -65,6 +69,13 @@ public class AmazonUtils {
 		s3Client.copyObject(bucket, keyFrom, bucket, keyTo);
 		s3Client.deleteObject(bucket, keyFrom);
 	}
+	
+	 public static int getTimeoutLambda(String function) {
+	    	AWSLambda client = AWSLambdaClientBuilder.standard().withRegion(Regions.EU_WEST_1).build();
+	    	GetFunctionRequest request = new GetFunctionRequest().withFunctionName(function);
+	    	GetFunctionResult response = client.getFunction(request);
+	    	return response.getConfiguration().getTimeout().intValue();
+	    }
 	
 	public static void uploadMultipartObject(String bucket, String path, String fileName, InputStream fileContentInputStream,
 			Integer fileSize) throws IOException {
