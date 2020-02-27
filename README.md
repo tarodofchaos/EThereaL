@@ -8,7 +8,7 @@
 Kingdom is under siege!
 The **Evil People™** are sending hordes of monsters each and every day to loot and wreak havoc amonsgt the citizens.
 
-Only the most valiant heroes can face the terrors of these #Evil People™# and their minions
+Only the most valiant heroes can face the terrors of these **Evil People™** and their minions
 
 
 - Every night, the **Evil People™** will send a batch of monsters via a folder in AWS S3.
