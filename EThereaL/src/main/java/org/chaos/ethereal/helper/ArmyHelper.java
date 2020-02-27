@@ -86,17 +86,17 @@ public class ArmyHelper {
 		armyHeroes.stream().forEach(h->{
 			h.setDamage(computeHeroStats(h.getMainStat()+h.getSecondaryStat()));
 			h.setMana(computeHeroStats(h.getMagic()*2));
-			h.setHitpoints(computeHeroStats(h.getMainStat()*30));
+			h.setHitpoints(computeHeroStats(h.getMainStat()*10));
 		});
 		army.setHeroes(armyHeroes);
 		
 		//For the sake of readability, sometimes a traditional for loop is better to be used
 		logger.log("Generating random monster army");
 		for (int i = 0; i < monstersSize; i++) {
-			currentMonster = new Monster();
-			currentMonster = SerializationUtils.clone(dbMonsters.get(UtilHelper.getRandomNumberInRange(0, dbMonsters.size()-1)));
+			currentMonster = dbMonsters.get(UtilHelper.getRandomNumberInRange(0, dbMonsters.size()-1));
+//			currentMonster = SerializationUtils.clone(dbMonsters.get(UtilHelper.getRandomNumberInRange(0, dbMonsters.size()-1)));
 			currentMonster.setComputedHP(computeMonsterHP(currentMonster.getHitpoints()));
-			currentMonster.setArmyId(i);
+//			currentMonster.setArmyId(i);
 			armyMonsters.add(currentMonster);
 		}
 		army.setMonsters(armyMonsters);
@@ -239,7 +239,7 @@ public class ArmyHelper {
 	}
 	
 	private Integer computeHeroStats(Integer stat) {
-		return Math.toIntExact(Math.round(stat*(monsterArmySize/heroArmySize)*0.05));
+		return Math.toIntExact(Math.round(stat*(monsterArmySize/heroArmySize)*0.2));
 	}
 	
     public static Map<String, Object> beanProperties(Object bean) throws Exception {

@@ -156,7 +156,8 @@ public class BattleReport {
 			.append("Monster casualties: ").append(getMonsterCasualties()).append(System.getProperty(LINE_SEPARATOR))
 			.append("Hardest hero hit: ").append(getHardestBlowHero()).append(" with ").append(getHardestBlowHeroNo()).append(" damage").append(System.getProperty(LINE_SEPARATOR))
 			.append("Hardest monster hit: ").append(getHardestBlowMonster()).append(" with ").append(getHardestBlowMonsterNo()).append(" damage").append(System.getProperty(LINE_SEPARATOR))
-			.append("Biggest monster horde: ").append(getBiggestHorde());
+			.append("Biggest monster horde: ").append(getBiggestHorde()).append(System.getProperty(LINE_SEPARATOR))
+			.append("Battle time: ").append(getBattleTime());
 		
 		return sb.toString();
 	}

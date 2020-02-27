@@ -157,7 +157,7 @@ public class BattleHelper {
 		//Arbitrarily selecting a hero to perform a critical hit
 		Integer critical = criticalHit(army.getHeroes().size());
 		StringBuilder sb = new StringBuilder();
-		List<Monster> deadMonsters = new ArrayList<>();
+//		List<Monster> deadMonsters = new ArrayList<>();
 		Hero hardestBlowHero = army.getHeroes().get(critical);
 		hardestBlowHero.setDamage(hardestBlowHero.getDamage()*3);
 		
@@ -178,11 +178,12 @@ public class BattleHelper {
 //			dmg += army.getMonsters().get(monsterCounter).getComputedHP();
 //			deadMonsters.add(army.getMonsters().get(monsterCounter));
 //		}
+		Integer deadMonsters = 0;
 		logger.log("Doing attack damage: "+totalDmg);
 		for (Monster monster : army.getMonsters()) {
 			if (totalDmg > monster.getComputedHP()) {
 				totalDmg -= monster.getComputedHP();
-				deadMonsters.add(monster);
+				deadMonsters++;
 			}else {
 				break;
 			}
@@ -190,14 +191,9 @@ public class BattleHelper {
 		hardestBlowHero.setDamage(hardestBlowHero.getDamage()/3);
 		
 		//We remove all the dead monsters from the main army list
-		army.getMonsters().removeAll(deadMonsters);
-//		army.getMonsters().stream().forEach(x -> System.out.println(x.getArmyId())); 
-//		Map<Integer, Monster> dmMap = army.getMonsters().stream().collect(Collectors.toMap(Monster::getArmyId, Function.identity()));
-//		deadMonsters.stream().forEach(m -> {
-//			dmMap.remove(m.getArmyId());
-//		});
-//		army.setMonsters(dmMap.values().stream().collect(Collectors.toList()));
-		report.setMonsterCasualties(report.getMonsterCasualties()+deadMonsters.size());
+//		army.getMonsters().removeAll(deadMonsters);
+		army.setMonsters(army.getMonsters().subList(0, deadMonsters));
+		report.setMonsterCasualties(report.getMonsterCasualties()+deadMonsters);
 	}
 
 	private Integer criticalHit(Integer attackerNo) {
